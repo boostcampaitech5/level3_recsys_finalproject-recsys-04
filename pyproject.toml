@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "reconi-backend"
+version = "0.1.0"
+description = ""
+authors = ["Woo-Yeol <king199276@gmail.com>"]
+readme = "README.md"
+packages = [{include = "reconi_backend"}]
+
+[tool.poetry.dependencies]
+python = "3.9.16"
+django = "^4.2.3"
+psycopg2-binary = "^2.9.6"
+pillow = "^10.0.0"
+djangorestframework = "^3.14.0"
+markdown = "^3.4.3"
+django-filter = "^23.2"
+django-environ = "^0.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
