@@ -2,7 +2,6 @@
 
 # airflow 관련 모듈
 from datetime import timedelta
-
 from airflow import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
@@ -16,6 +15,24 @@ import requests
 
 import psycopg2.extras
 from sqlalchemy import create_engine
+
+import logging
+
+# 로거 인스턴스 생성
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# 콘솔 핸들러 생성
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+# 로그 포맷 설정
+log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+formatter = logging.Formatter(log_format)
+console_handler.setFormatter(formatter)
+
+# 콘솔 핸들러를 로거에 추가
+logger.addHandler(console_handler)
 
 
 def coupang_review() -> None:
@@ -35,7 +52,7 @@ def coupang_review() -> None:
             try:
                 requests.get(url)
             except requests.exceptions.RequestException:
-                print("유효하지 않은 URL입니다.")
+                logger.info(f"유효하지 않은 URL입니다. {df['title']} 리뷰 데이터 수집 실패!")
                 continue
 
         title = df["title"]
@@ -46,7 +63,7 @@ def coupang_review() -> None:
 
     end = time.time()
 
-    print(f"\n{end - start:.4f}초가 소요되었습니다.\n")
+    logger.info(f"\n{end - start:.4f}초가 소요되었습니다.\n")
 
 
 def transform_load_review() -> None:
@@ -110,6 +127,8 @@ def transform_load_review() -> None:
         psycopg2.extras.execute_values(
             cursor, insert_sql, values, template=None, page_size=1000
         )
+
+        logger.info(f"{reviews['원두이름']} 데이터 Load 완료!")
 
     # 변경사항 커밋
     conn.commit()
