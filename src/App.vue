@@ -1,17 +1,32 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <NavVar></NavVar>
+  <MainIntro></MainIntro>
+  <MainReview></MainReview>
+  <MainProductSample></MainProductSample>
+  <MainReconi></MainReconi>
+  <Footer></Footer>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import NavVar from "./components/NavVar.vue";
+import MainIntro from "./components/MainIntro.vue";
+import MainReview from "./components/MainReview.vue";
+import MainProductSample from "./components/MainProductSample.vue";
+import MainReconi from "./components/MainReconi.vue";
+import Footer from "./components/Footer.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    NavVar,
+    MainIntro,
+    MainReview,
+    MainProductSample,
+    MainReconi,
+    Footer,
+  },
+
+};
 </script>
 
 <style>
@@ -21,6 +36,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  /* margin-top: 60px; */
 }
 </style>

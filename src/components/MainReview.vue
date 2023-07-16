@@ -1,0 +1,187 @@
+<template>
+  <div>
+    <div class="Clients">
+      <div class="Frame17">
+        <div class="Frame16">
+          <span class="Frame16-title">
+            내 커피 인생은 <br> 듀콩을 만나기 전과 후로 나뉜다.
+          </span>
+          <span class="Frame16-sub"> 영화 "봄날에 커피를 마시며"</span>
+        </div>
+        <div class="Frame16-2">
+          <div class="Frame60">
+            <div class="Client-review">
+              <div class="Frame62">
+                <img v-for="num in 5" :key="num" :src="Star" alt="Star" />
+              </div>
+              <span class="Client-review-text"
+                >"동서남북 어디에서도 나란 얼간이는 없다고 그래도 너 하나만
+                사랑한다고 쉽게 녹아 버린 네 마음 상처받은 MC몽 사랑은 아아아아
+                아이스크림"</span
+              >
+              <div class="Frame63">
+                <div class="Avatar">
+                  <img class="Client-review-img" :src="sample" alt="sample" />
+                </div>
+                <span class="Client-review-img-text"> Jisu Lim </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import Star from "../assets/mainReview/Feather_Icon.svg";
+import sample from "../assets/mainReview/sample.jpg";
+export default {
+  name: "main-review",
+  data() {
+    return {
+      Star: Star,
+      sample: sample,
+    };
+  },
+};
+</script>
+
+<style>
+.Clients {
+  /* width: 1440px; */
+  padding: 80px 120px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  display: flex;
+
+  background: #fff;
+}
+
+.Frame17 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  align-self: stretch;
+}
+
+.Frame16 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+.Frame16-title {
+  /* width: 1000px; */
+  color: var(--system-grey-900, #212121);
+  display: flex;
+  text-align: center;
+  font-family: Inter;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: 0.2px;
+  text-transform: capitalize;
+  word-break: keep-all; /* 단어 단위로 줄바꿈을 방지합니다 */
+  background: #fff;
+}
+
+.Frame16-sub {
+  color: var(--system-grey-600, #757575);
+  text-align: center;
+  font-family: Inter;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.2px;
+  text-transform: capitalize;
+}
+
+.Frame16-2 {
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 50px;
+}
+
+.Frame60 {
+  display: flex;
+  align-items: center;
+  gap: 42px;
+  align-self: stretch;
+}
+
+.Client-review {
+  display: flex;
+  width: 414px;
+  height: 323px;
+  padding: 10px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 27px;
+}
+
+.Frame62 {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.Client-review-text {
+  align-self: stretch;
+  color: var(--system-grey-800, #424242);
+  text-align: center;
+  font-family: Inter;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 32px; /* 160% */
+  letter-spacing: 0.2px;
+  text-transform: capitalize;
+}
+
+.Frame63 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.Avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.Client-review-img {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 40px;
+  background: url("../assets/mainReview/sample.jpg"),
+    lightgray 50% / cover no-repeat;
+}
+
+.Client-review-img-text {
+  color: var(--system-grey-600, #757575);
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.2px;
+  text-transform: capitalize;
+}
+</style>
