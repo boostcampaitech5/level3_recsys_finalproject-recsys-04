@@ -19,7 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("coffee_bean.urls")),
+    path("api/", include("coffee_bean.urls")),
     # RESTful Framework
     path("api-auth/", include("rest_framework.urls")),
 ]

@@ -15,6 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
+from rest_framework import routers
+from .views import (
+    CoffeeBeanOriginsViewSet,
+    CoffeeBeanOriginViewSet,
+    CoffeeBeanReviewViewSet,
+    CoffeeBeanViewSet,
+)
 
+router = routers.DefaultRouter()
+router.register(r"coffee-beans", CoffeeBeanViewSet)
+router.register(r"bean-origin", CoffeeBeanOriginViewSet)
+router.register(r"bean-origins", CoffeeBeanOriginsViewSet)
+router.register(r"bean-reviews", CoffeeBeanReviewViewSet)
 
-urlpatterns = []
+urlpatterns = [
+    # ViewSet 라우터를 추가합니다.
+    path("v1/", include(router.urls)),
+]

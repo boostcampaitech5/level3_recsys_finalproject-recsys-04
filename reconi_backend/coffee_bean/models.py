@@ -8,7 +8,18 @@
 from django.db import models
 
 
-class CoffeeBeanBean(models.Model):
+class CoffeeBeanOrigin(models.Model):
+    country = models.CharField(primary_key=True, max_length=30)
+
+    def __str__(self) -> str:
+        return str(self.country)
+
+    class Meta:
+        managed = False
+        db_table = "coffee_bean_origin"
+
+
+class CoffeeBean(models.Model):
     id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=100, blank=True, null=True)
     aroma = models.FloatField(blank=True, null=True)
@@ -21,15 +32,21 @@ class CoffeeBeanBean(models.Model):
     description = models.TextField(blank=True, null=True)
     coupang_link = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return str(self.title)
+
     class Meta:
         managed = False
         db_table = "coffee_bean_bean"
 
 
-class CoffeeBeanBeanOrigins(models.Model):
+class CoffeeBeanOrigins(models.Model):
     id = models.BigAutoField(primary_key=True)
-    bean = models.ForeignKey(CoffeeBeanBean, models.DO_NOTHING)
+    bean = models.ForeignKey(CoffeeBean, models.DO_NOTHING)
     origin = models.ForeignKey("CoffeeBeanOrigin", models.DO_NOTHING)
+
+    def __str__(self):
+        return str(self.origin.country)
 
     class Meta:
         managed = False
@@ -37,22 +54,17 @@ class CoffeeBeanBeanOrigins(models.Model):
         unique_together = (("bean", "origin"),)
 
 
-class CoffeeBeanBeanreview(models.Model):
+class CoffeeBeanReview(models.Model):
     title = models.CharField(max_length=100, blank=True, null=True)
     user_nickname = models.CharField(max_length=20, blank=True, null=True)
     rating = models.IntegerField(blank=True, null=True)
     content = models.TextField(blank=True, null=True)
-    taste_satisfication = models.CharField(max_length=20, blank=True, null=True)
-    bean_id = models.ForeignKey(CoffeeBeanBean, models.DO_NOTHING)
+    taste_satisfaction = models.CharField(max_length=20, blank=True, null=True)
+    bean_id = models.ForeignKey(CoffeeBean, models.DO_NOTHING)
+
+    def __str__(self):
+        return str(self.user_nickname + "-" + self.bean_id.title)
 
     class Meta:
         managed = False
         db_table = "coffee_bean_beanreview"
-
-
-class CoffeeBeanOrigin(models.Model):
-    country = models.CharField(primary_key=True, max_length=30)
-
-    class Meta:
-        managed = False
-        db_table = "coffee_bean_origin"
