@@ -20,15 +20,22 @@
       </div>
     </div>
   </div>
+  <TestResult></TestResult>
+
+
 </template>
 
 <script>
+import TestResult from './TestResult.vue';
 export default {
   mounted() {
     const script = document.createElement('script');
     script.src = 'https://server.fillout.com/embed/v1/';
     document.head.appendChild(script);
   },
+  components:{
+    TestResult,
+  }
 };
 </script>
 
