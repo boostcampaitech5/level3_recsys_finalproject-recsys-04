@@ -56,6 +56,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Logging
+    "coffee_bean.middleware.LogMiddleware",
 ]
 
 ROOT_URLCONF = "reconi_backend.urls"
@@ -112,6 +114,33 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASS", "pass"),
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "3306"),
+    },
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "user_logs": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "user_logs.log"),
+            "maxBytes": 1024 * 1024 * 1024,  # 파일 크기 제한 (1024MB)
+            "backupCount": 5,  # 보관할 백업 파일 수
+            "formatter": "verbose",  # 로그 포맷 설정
+        },
+    },
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        },
+    },
+    "loggers": {
+        "user_logs": {
+            "handlers": ["user_logs"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
     },
 }
 
