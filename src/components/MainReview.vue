@@ -4,7 +4,8 @@
       <div class="Frame17">
         <div class="Frame16">
           <span class="Frame16-title">
-            내 커피 인생은 <br> 듀콩을 만나기 전과 후로 나뉜다.
+            내 커피 인생은 <br />
+            듀콩을 만나기 전과 후로 나뉜다.
           </span>
           <span class="Frame16-sub"> 영화 "봄날에 커피를 마시며"</span>
         </div>
@@ -26,6 +27,38 @@
                 <span class="Client-review-img-text"> Jisu Lim </span>
               </div>
             </div>
+            <div class="Client-review">
+              <div class="Frame62">
+                <img v-for="num in 5" :key="num" :src="Star" alt="Star" />
+              </div>
+              <span class="Client-review-text"
+                >"I'm super shy, super shy But wait a minute while I make you
+                mine, make you mine 떨리는 지금도 you're on my mind all the time
+                I wanna tell you"</span
+              >
+              <div class="Frame63">
+                <div class="Avatar">
+                  <img class="Client-review-img" :src="sample2" alt="sample2" />
+                </div>
+                <span class="Client-review-img-text"> Dohyun Lim </span>
+              </div>
+            </div>
+            <div class="Client-review">
+              <div class="Frame62">
+                <img v-for="num in 5" :key="num" :src="Star" alt="Star" />
+              </div>
+              <span class="Client-review-text"
+                >"Lolli lolli lollipop boy 넌 나의 lollipop Lolli lolli lollipop
+                oh lolli-pop-pop Lolli lolli lollipop boy 넌 나의 lollipop Lolli
+                lolli lollipop oh lolli-pop-pop"</span
+              >
+              <div class="Frame63">
+                <div class="Avatar">
+                  <img class="Client-review-img" :src="sample3" alt="sample3" />
+                </div>
+                <span class="Client-review-img-text"> Yerim Park </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -36,12 +69,16 @@
 <script>
 import Star from "../assets/mainReview/Feather_Icon.svg";
 import sample from "../assets/mainReview/sample.jpg";
+import sample2 from "../assets/mainReview/sample2.jpg";
+import sample3 from "../assets/mainReview/sample3.jpg";
 export default {
   name: "main-review",
   data() {
     return {
       Star: Star,
       sample: sample,
+      sample2: sample2,
+      sample3: sample3,
     };
   },
 };
