@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # RestFramework
     "rest_framework",
+    # Swagger
+    "drf_yasg",
     # Apps
     "coffee_bean.apps.CoffeeBeanConfig",
 ]
