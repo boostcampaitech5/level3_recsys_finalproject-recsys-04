@@ -7,62 +7,174 @@
           당신에 대해 알려주세요.
         </span>
         <span class="Frame9-sub">
-          응답한 기록을 바탕으로 당신에게 꼭 맞는 커피를 추천해드릴께요.
+          응답해주신 기록을 바탕으로 당신에게 꼭 맞는 커피를 추천해드릴게요.
         </span>
-        <div
-          data-fillout-id="18z1Eu8mDJus"
-          data-fillout-embed-type="standard"
-          style="width: 100%; height: 1000px"
-          data-fillout-inherit-parameters
-          data-fillout-dynamic-resize
-        ></div>
-        <!-- <script src="https://server.fillout.com/embed/v1/"></script> -->
       </div>
+    </div>
+    <div> 
+      <!-- 성별 -->
+      <b-form-group label="당신의 성별을 알려주세요" v-slot="{ ariaDescribedby }">
+        <b-form-radio
+          v-model="selected"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="남자"
+          >남자</b-form-radio
+        >
+        <b-form-radio
+          v-model="selected"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="여자"
+          >여자</b-form-radio
+        >
+      </b-form-group>
+      <!-- 연령대 -->
+      <b-form-group label="당신의 연령대를 알려주세요" v-slot="{ ariaDescribedby }">
+        <b-form-radio
+          v-model="ageRange"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="10대"
+          >10대</b-form-radio
+        >
+        <b-form-radio
+          v-model="ageRange"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="20대"
+          >20대</b-form-radio
+        >
+        <b-form-radio
+          v-model="ageRange"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="30대"
+          >30대</b-form-radio
+        >
+        <b-form-radio
+          v-model="ageRange"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="40대"
+          >40대</b-form-radio
+        >
+        <b-form-radio
+          v-model="ageRange"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="50대"
+          >50대</b-form-radio
+        >
+        <b-form-radio
+          v-model="ageRange"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="60대 이상"
+          >60대 이상</b-form-radio
+        >
+      </b-form-group>
+      <!-- 선호하는 향 -->
+      <b-form-group label="커피를 드실 때 선호하는 향을 선택해주세요" v-slot="{ ariaDescribedby }">
+      <b-form-radio
+          v-model="flavor"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="초콜릿향"
+          >초콜릿향</b-form-radio
+        >
+      <b-form-radio
+          v-model="flavor"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="고소한 견과류향"
+          >고소한 견과류향</b-form-radio
+        >
+      <b-form-radio
+          v-model="flavor"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="상큼한 과일향"
+          >상큼한 과일향</b-form-radio
+        >
+      <b-form-radio
+          v-model="flavor"
+          :aria-describedby="ariaDescribedby"
+          name="some-radios"
+          value="상큼한 과일향"
+          >상큼한 과일향</b-form-radio
+        >
+      </b-form-group>
+      <!-- 산미 -->
+      <div>
+        <label for="range-2">커피를 드실 때 선호하는 산미의 정도를 선택해주세요</label>
+        <b-form-input id="range-2" v-model="acid" type="range" min="0" max="10" step="1"></b-form-input>
+        <div class="mt-2">{{ acid }} / 10</div>
+      </div>
+      <!-- 단맛 -->
+      <div>
+        <label for="range-2">커피를 드실 때 선호하는 단맛의 정도를 선택해주세요</label>
+        <b-form-input id="range-2" v-model="sweet" type="range" min="0" max="10" step="1"></b-form-input>
+        <div class="mt-2">{{ sweet }} / 10</div>
+      </div>
+      <!-- 바디감 -->
+      <div>
+        <label for="range-2">커피를 드실 때 선호하는 바디감의 정도를 선택해주세요</label>
+        <b-form-input id="range-2" v-model="bodyRate" type="range" min="0" max="10" step="1"></b-form-input>
+        <div class="mt-2">{{ bodyRate }} / 10</div>
+      </div>
+      <!-- 로스팅 -->
+      <div>
+        <label for="range-2">커피를 드실 때 선호하는 단맛의 정도를 선택해주세요</label>
+        <b-form-input id="range-2" v-model="roast" type="range" min="0" max="10" step="1"></b-form-input>
+        <div class="mt-2">{{ roast }} / 10</div>
+      </div>
+      <b-button variant="outline-primary">Submit</b-button>
+
     </div>
   </div>
   <TestResult></TestResult>
-
-
 </template>
 
 <script>
-import TestResult from './TestResult.vue';
+import TestResult from "./TestResult.vue";
 export default {
-  mounted() {
-    const script = document.createElement('script');
-    script.src = 'https://server.fillout.com/embed/v1/';
-    document.head.appendChild(script);
+  data(){
+    return{
+      gender : '',
+      ageRange : '',
+      flavor : '',
+      acid : 0,
+      sweet : 0,
+      bodyRate : 0,
+      roast : 0,
+    }
   },
-  components:{
+  components: {
     TestResult,
-  }
+  },
 };
 </script>
 
 <style>
 .Frame {
-  display: flex;
-  /* width: 1440px; */
-  height: 1200px;
-  padding: 0 120px 80px;
-  justify-content: center;
+  display: inline-flex;
+  padding: 50px 180px;
+  flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 102px;
   background: #fff;
 }
 .Frame10 {
   display: flex;
-  width: 1081px;
+  width: 1080px;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   gap: 50px;
-  flex-shrink: 0;
 }
 .Frame9 {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   gap: 16px;
   align-self: stretch;
