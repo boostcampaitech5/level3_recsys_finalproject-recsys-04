@@ -1,19 +1,22 @@
 <template>
   <div class="baseBG" id="9:4606">
     <div class="Frame10">
-      <div class="Frame9">
-        <p class="Frame9-title">
+      <div class="Frame99">
+        <p class="Frame99-title">
           당신에게 어울리는 커피를
           <br />
           찾아드릴게요
         </p>
-        <p class="Frame9-sub">
+        <p class="Frame99-sub">
           누구에게나 똑같은 커피가 아닌, 오직 당신을 위한 커피를 AI가
           추천드립니다.
         </p>
       </div>
       <div class="Frame12">
-        <b-button pill variant="outline-danger" class="Frame12-button">테스트 하기</b-button>
+        <b-button pill variant="outline-danger" class="Frame12-button"
+          router-link to="/test"
+          >테스트 하기</b-button
+        >
       </div>
     </div>
   </div>
@@ -34,9 +37,9 @@ export default {
   justify-content: center;
   align-items: center;
   gap: 20px;
-  background: var(--light-primary-origin, #3563E9);
+  background: var(--light-primary-origin, #3563e9);
 }
-.Frame10{
+.Frame10 {
   display: flex;
   width: 1081px;
   flex-direction: column;
@@ -45,7 +48,7 @@ export default {
   gap: 50px;
   flex-shrink: 0;
 }
-.Frame9{
+.Frame99 {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -53,9 +56,9 @@ export default {
   gap: 16px;
   align-self: stretch;
 }
-.Frame9-title{
+.Frame99-title {
   /* width: 923px; */
-  color: var(--white, #FFF);
+  color: var(--white, #fff);
   text-align: center;
   font-family: Inter;
   font-size: 64px;
@@ -65,9 +68,9 @@ export default {
   letter-spacing: 3.2px;
   text-transform: uppercase;
 }
-.Frame9-sub{
+.Frame99-sub {
   /* width: 755px; */
-  color: var(--system-grey-50, #FAFAFA);
+  color: var(--system-grey-50, #fafafa);
   text-align: center;
   font-family: Inter;
   font-size: 20px;
@@ -76,18 +79,15 @@ export default {
   line-height: 30px; /* 150% */
   letter-spacing: 0.2px;
 }
-.Frame12{
+.Frame12 {
   display: flex;
   align-items: flex-start;
   gap: 20px;
 }
-.Frame12-button{
+.Frame12-button {
   display: flex;
   padding: 15px 20px;
   align-items: center;
   gap: 10px;
 }
-
 </style>
-
-
