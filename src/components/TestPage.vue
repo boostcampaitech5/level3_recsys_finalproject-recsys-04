@@ -11,125 +11,125 @@
         </span>
       </div>
     </div>
-    <div> 
+    <div class="Form-area"> 
       <!-- 성별 -->
-      <b-form-group label="당신의 성별을 알려주세요" v-slot="{ ariaDescribedby }">
+      <b-form-group label="당신의 성별을 알려주세요" v-slot="{ ariaDescribedby }" class="mt-4">
         <b-form-radio
           v-model="selected"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="gendoer-radios"
           value="남자"
           >남자</b-form-radio
         >
         <b-form-radio
           v-model="selected"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="gendoer-radios"
           value="여자"
           >여자</b-form-radio
         >
       </b-form-group>
       <!-- 연령대 -->
-      <b-form-group label="당신의 연령대를 알려주세요" v-slot="{ ariaDescribedby }">
+      <b-form-group label="당신의 연령대를 알려주세요" v-slot="{ ariaDescribedby }" class="mt-4">
         <b-form-radio
           v-model="ageRange"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="age-radios"
           value="10대"
           >10대</b-form-radio
         >
         <b-form-radio
           v-model="ageRange"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="age-radios"
           value="20대"
           >20대</b-form-radio
         >
         <b-form-radio
           v-model="ageRange"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="age-radios"
           value="30대"
           >30대</b-form-radio
         >
         <b-form-radio
           v-model="ageRange"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="age-radios"
           value="40대"
           >40대</b-form-radio
         >
         <b-form-radio
           v-model="ageRange"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="age-radios"
           value="50대"
           >50대</b-form-radio
         >
         <b-form-radio
           v-model="ageRange"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="age-radios"
           value="60대 이상"
           >60대 이상</b-form-radio
         >
       </b-form-group>
       <!-- 선호하는 향 -->
-      <b-form-group label="커피를 드실 때 선호하는 향을 선택해주세요" v-slot="{ ariaDescribedby }">
+      <b-form-group label="커피를 드실 때 선호하는 향을 선택해주세요" v-slot="{ ariaDescribedby }" class="mt-4">
       <b-form-radio
           v-model="flavor"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="flvor-radios"
           value="초콜릿향"
           >초콜릿향</b-form-radio
         >
       <b-form-radio
           v-model="flavor"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="flvor-radios"
           value="고소한 견과류향"
           >고소한 견과류향</b-form-radio
         >
       <b-form-radio
           v-model="flavor"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="flvor-radios"
           value="상큼한 과일향"
           >상큼한 과일향</b-form-radio
         >
       <b-form-radio
           v-model="flavor"
           :aria-describedby="ariaDescribedby"
-          name="some-radios"
+          name="flvor-radios"
           value="상큼한 과일향"
           >상큼한 과일향</b-form-radio
         >
       </b-form-group>
       <!-- 산미 -->
-      <div>
+      <div class="mt-4 ml-4 mr-4">
         <label for="range-2">커피를 드실 때 선호하는 산미의 정도를 선택해주세요</label>
         <b-form-input id="range-2" v-model="acid" type="range" min="0" max="10" step="1"></b-form-input>
         <div class="mt-2">{{ acid }} / 10</div>
       </div>
       <!-- 단맛 -->
-      <div>
+      <div class="mt-4 ml-4 mr-4">
         <label for="range-2">커피를 드실 때 선호하는 단맛의 정도를 선택해주세요</label>
         <b-form-input id="range-2" v-model="sweet" type="range" min="0" max="10" step="1"></b-form-input>
         <div class="mt-2">{{ sweet }} / 10</div>
       </div>
       <!-- 바디감 -->
-      <div>
+      <div class="mt-4 ml-4 mr-4">
         <label for="range-2">커피를 드실 때 선호하는 바디감의 정도를 선택해주세요</label>
-        <b-form-input id="range-2" v-model="bodyRate" type="range" min="0" max="10" step="1"></b-form-input>
+        <b-form-input id="range-4" v-model="bodyRate" type="range" min="0" max="10" step="1"></b-form-input>
         <div class="mt-2">{{ bodyRate }} / 10</div>
       </div>
       <!-- 로스팅 -->
-      <div>
+      <div class="mt-4 ml-4 mr-4">
         <label for="range-2">커피를 드실 때 선호하는 단맛의 정도를 선택해주세요</label>
-        <b-form-input id="range-2" v-model="roast" type="range" min="0" max="10" step="1"></b-form-input>
+        <b-form-input id="range-5" v-model="roast" type="range" min="0" max="10" step="1"></b-form-input>
         <div class="mt-2">{{ roast }} / 10</div>
       </div>
-      <b-button variant="outline-primary">Submit</b-button>
+      <b-button class="mt-4 mb-4" variant="outline-primary">Submit</b-button>
 
     </div>
   </div>
@@ -202,4 +202,41 @@ export default {
   line-height: normal;
   letter-spacing: 0.2px;
 }
+
+.Form-area{
+  background-color: #f7f7f7;
+  border-radius: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.b-form-group {
+  margin-bottom: 20px;
+}
+
+/* 레인지 인풋 스타일 */
+b-form-input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  background-color: #f7f7f7;
+  height: 10px;
+  border-radius: 5px;
+  outline: none;
+  margin-top: 8px;
+}
+
+b-form-input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #007bff;
+  cursor: pointer;
+}
+
+/* Submit 버튼 스타일 */
+b-button {
+  width: 100%;
+}
+
 </style>
