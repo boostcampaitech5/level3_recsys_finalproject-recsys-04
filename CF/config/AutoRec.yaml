@@ -1,6 +1,6 @@
 baseline:
   config_name: baseline
-  data_path: /opt/ml/Recommendation-Modeling/data/ko-sbert_dbscan_interaction.csv
+  data_path: /opt/ml/Recommendation-Modeling/data/entity_linking_interaction.csv
   dataset: TorchDataset
   dataset_params:
     batch_size: 16

@@ -44,7 +44,10 @@ class BaseModel:
         with Pool(cpu_count()) as p:
             user_preds = p.starmap(
                 self.predict_for_user,
-                [(user, group, self.pred[user, :], items, k) for user, group in g],
+                [
+                    (user, group, self.pred[user, :], items, k)
+                    for user, group in g
+                ],
             )
         df = pd.concat(user_preds)
         df["item"] = item_enc.inverse_transform(df["item"])

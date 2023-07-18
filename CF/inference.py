@@ -28,7 +28,7 @@ def main(args):
     inters = load_user_cluster_interaction(config["data_path"])
     # 현재는 toy data
     items = inters["item"].unique()
-    inters = inters[inters["user"] == 4]
+    inters = inters[inters["user"] == inters["user"].unique()[0]]
 
     users = inters["user"].unique()
 

@@ -114,6 +114,10 @@ def preprocess_for_train(
     for user, item, rating in origin:
         origin_mat[user, item] = rating
 
+    train_mat /= 5
+    test_mat /= 5
+    origin_mat /= 5
+
     save_encoders(user_enc, item_enc, num_users, num_items, "./saved")
     return origin_mat, train_mat, test_mat, num_users, num_items
 
@@ -149,6 +153,8 @@ def preprocess_for_inference(
         output[user, item] = rating
     for user, item, rating in data:
         output[user, item] = rating
+
+    output /= 5
 
     return output, user_enc, item_enc
 
