@@ -9,6 +9,11 @@
       <p>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
       </p>
+      <b-container class="bv-example-row">
+        <b-row class = "pt-5" v-for="num in 10" :key="num">
+          <b-col v-for="n in 3" :key="n"> <Card/> </b-col>
+        </b-row>
+      </b-container>
     </div>
 
     <nav id="sidebar">
@@ -44,7 +49,13 @@
             <a href="#" class="tag-cloud-link">tasty</a>
             <a href="#" class="tag-cloud-link">delicious</a>
             <a href="#" class="tag-cloud-link">desserts</a>
-            <a href="#" class="tag-cloud-link">drinks</a>
+            <a href="#" class="tag-cloud-link">dish</a>
+            <a href="#" class="tag-cloud-link">menu</a>
+            <a href="#" class="tag-cloud-link">food</a>
+            <a href="#" class="tag-cloud-link">sweet</a>
+            <a href="#" class="tag-cloud-link">tasty</a>
+            <a href="#" class="tag-cloud-link">delicious</a>
+            <a href="#" class="tag-cloud-link">desserts</a>
           </div>
         </div>
 
@@ -54,10 +65,13 @@
 </template>
 
 <script>
-
+import Card from './Card.vue';
 
 export default {
   name: "products-main",
+  components:{
+    Card,
+  }
 };
 </script>
 
