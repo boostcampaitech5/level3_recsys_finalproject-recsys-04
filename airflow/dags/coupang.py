@@ -7,11 +7,10 @@ from airflow.utils.dates import days_ago
 from airflow.operators.python import PythonOperator
 
 # task 관련 모듈
-from src.coupang_crawler import OpenPyXL
+from src.coupang.coupang_crawler import OpenPyXL
 import os
 import time
 import pandas as pd
-import requests
 
 import psycopg2.extras
 from sqlalchemy import create_engine
@@ -40,23 +39,24 @@ def coupang_review() -> None:
     URL = "postgresql+psycopg2://sumin:sumin@101.101.210.35:30005/djangodb"
     engine = create_engine(URL, echo=False)
 
-    pg_query = "select * from coffee_bean_bean where coupang_link is not null and roastery = '콩스콩스'"
+    pg_query = "select * from coffee_bean_bean where coupang_link is not null and roastery = '콩스콩스' limit 5;"
     df = pd.read_sql_query(pg_query, con=engine)
 
     start = time.time()
-    for url in df["coupang_link"]:
-        # url이 없는 경우 pass
-        if url is None:
-            continue
-        else:  # url이 유효하다면 실행
-            try:
-                requests.get(url)
-            except requests.exceptions.RequestException:
-                logger.info(f"유효하지 않은 URL입니다. {df['title']} 리뷰 데이터 수집 실패!")
-                continue
+    for idx in range(len(df)):
+        url = df["coupang_link"][idx]
+        title = df["title"][idx]
+        roastery = df["roastery"][idx]
+        # # url이 없는 경우 pass
+        # if url is None:
+        #     continue
+        # else:  # url이 유효하다면 실행
+        #     try:
+        #         requests.get(url)
+        #     except requests.exceptions.RequestException:
+        #         logger.info(f"유효하지 않은 URL입니다. {df['title']} 리뷰 데이터 수집 실패!")
+        #         continue
 
-        title = df["title"]
-        roastery = df["roastery"]
         OpenPyXL.save_file(
             title, roastery, url=url, save_none_contents=True
         )  # 항상 내용이 없어도 수집
@@ -75,8 +75,9 @@ def transform_load_review() -> None:
     cursor = conn.cursor()
 
     # raw data를 하나씩 읽어오며 DB에 INSERT 후 삭제
-    for file in os.listdir("/opt/ml/coffee/dataset/raw_data/reviews/coupang"):
-        reviews = pd.read_csv(file)  # review data
+    file_path = "/opt/ml/coffee/dataset/raw_data/reviews/coupang/"
+    for file in os.listdir(file_path):
+        reviews = pd.read_csv(file_path + file)  # review data
         roastery = reviews["로스터리"].unique()[0]
         # review data와 원두 아이디 매칭하기 위해 DB에서 원두 데이터 불러오기
         pg_query = f"select * from coffee_bean_bean where coupang_link is not null and roastery = '{roastery}'"
@@ -98,6 +99,8 @@ def transform_load_review() -> None:
                 "구매자 평점": "rating",
                 "리뷰 내용": "content",
                 "맛 만족도": "taste_satisfaction",
+                "날짜": "date",
+                "플랫폼": "platform",
             }
         )
         merged_df = merged_df[
@@ -108,6 +111,8 @@ def transform_load_review() -> None:
                 "content",
                 "taste_satisfaction",
                 "bean_id_id",
+                "date",
+                "platform",
             ]
         ]
 
@@ -130,6 +135,8 @@ def transform_load_review() -> None:
 
         logger.info(f"{reviews['원두이름']} 데이터 Load 완료!")
 
+        os.remove(file_path + file)
+
     # 변경사항 커밋
     conn.commit()
 
@@ -141,7 +148,7 @@ def transform_load_review() -> None:
 with DAG(
     dag_id="coupang_review",  # DAG의 식별자용 아이디
     description="쿠팡 리뷰 배치단위 수집(크롤링)",  # DAG에 대한 설명
-    start_date=days_ago(2),  # DAG 정의 기준 2일 전부터 시작
+    start_date=days_ago(1),  # DAG 정의 기준 2일 전부터 시작
     schedule_interval="0 0 * * *",  # 매일 자정에 실행
     tags=["review_coupang"],  # 태그는 리뷰로 설정
 ) as dag:
@@ -154,7 +161,7 @@ with DAG(
         depends_on_past=True,
         owner="sumin",
         retries=3,
-        retry_delay=timedelta(minutes=10),
+        retry_delay=timedelta(minutes=5),
     )
 
     # coupang_review()를 통해 수집된 raw data를 전처리 후 DB에 load합니다.

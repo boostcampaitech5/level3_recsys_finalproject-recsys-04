@@ -12,7 +12,7 @@ def get_headers(
     key: str, default_value: Optional[str] = None
 ) -> Dict[str, Dict[str, str]]:
     """Get Headers"""
-    JSON_FILE: str = "json/headers.json"
+    JSON_FILE: str = "/opt/ml/coffee/airflow/dags/json/headers.json"
 
     with open(JSON_FILE, "r", encoding="UTF-8") as file:
         headers: Dict[str, Dict[str, str]] = json.loads(file.read())
@@ -164,10 +164,19 @@ class Coupang:
                 answer = articles[idx].select_one(
                     "span.sdp-review__article__list__survey__row__answer"
                 )
-                if answer == None or answer.text == "":
+                if answer is None or answer.text == "":
                     answer = "맛 평가 없음"
                 else:
                     answer = answer.text.strip()
+
+                # 날짜
+                date = articles[idx].select_one(
+                    "div.sdp-review__article__list__info__product-info__reg-date"
+                )
+                if date is None or date.text == "":
+                    date = "알 수 없음"
+                else:
+                    date = date.text.strip()
 
                 dict_data["상품명"] = prod_name
                 dict_data["구매자 이름"] = user_name
@@ -175,10 +184,12 @@ class Coupang:
                 dict_data["리뷰 제목"] = headline
                 dict_data["리뷰 내용"] = review_content
                 dict_data["맛 만족도"] = answer
+                dict_data["날짜"] = date
+                dict_data["플랫폼"] = "쿠팡"
 
                 save_data.append(dict_data)
 
-                print(dict_data, "\n")
+                # print(dict_data, "\n")
 
             time.sleep(1)
 
@@ -223,6 +234,10 @@ class OpenPyXL:
 
         result_df["원두이름"] = title
         result_df["로스터리"] = roastery
+        result_df["날짜"] = pd.to_datetime(result_df["날짜"]).dt.strftime(
+            "%Y-%m-%d %H:%M:%S %Z"
+        )
+
         result_df.to_csv(os.path.join(savePath, fileName), index=False)
 
         print(f"파일 저장완료!\n\n{os.path.join(savePath,fileName)}")
