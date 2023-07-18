@@ -34,47 +34,59 @@
         <ul class="list-unstyled components mb-5">
           <li>
             <a> 신맛 </a>
-            <b-form-input
-              id="range-1"
-              v-model="value"
-              type="range"
-              min="1"
-              max="5"
-              class="scroll"
-            ></b-form-input>
+            <Vueform size="sm" v-model="acidRange" sync>
+              <SliderElement
+                name="range"
+                :default="[0, 10]"
+                :min="0"
+                :max="10"
+                :step="1"
+                show-tooltip="focus"
+                tooltip-position="top"
+              />
+            </Vueform>
           </li>
           <li>
             <a>단맛</a>
-            <b-form-input
-              id="range-1"
-              v-model="value"
-              type="range"
-              min="1"
-              max="5"
-              class="scroll"
-            ></b-form-input>
+            <Vueform size="sm" v-model="sweetyRange" sync>
+              <SliderElement
+                name="range"
+                :default="[0, 10]"
+                :min="0"
+                :max="10"
+                :step="1"
+                show-tooltip="focus"
+                tooltip-position="top"
+              />
+            </Vueform>
           </li>
           <li>
             <a>바디감</a>
-            <b-form-input
-              id="range-1"
-              v-model="value"
-              type="range"
-              min="1"
-              max="5"
-              class="scroll"
-            ></b-form-input>
+            <Vueform size="sm" v-model="bodyRange" sync>
+              <SliderElement
+                name="range"
+                :default="[0, 10]"
+                :min="0"
+                :max="10"
+                :step="1"
+                show-tooltip="focus"
+                tooltip-position="top"
+              />
+            </Vueform>
           </li>
           <li>
             <a>로스팅</a>
-            <b-form-input
-              id="range-1"
-              v-model="value"
-              type="range"
-              min="1"
-              max="5"
-              class="scroll"
-            ></b-form-input>
+            <Vueform size="sm" v-model="roastRange" sync>
+              <SliderElement
+                name="range"
+                :default="[0, 10]"
+                :min="0"
+                :max="10"
+                :step="1"
+                show-tooltip="focus"
+                tooltip-position="top"
+              />
+            </Vueform>
           </li>
         </ul>
         <div class="mb-5">
@@ -106,6 +118,19 @@ import Card from "./Card.vue";
 
 export default {
   name: "products-main",
+  data() {
+    return {
+      acidRange:[],
+      sweetyRange:[],
+      bodyRange:[],
+      roastRange:[],
+    };
+  },
+  watch: {
+    acidValue() {
+      console.log(this.acidValue);
+    },
+  },
   components: {
     Card,
   },
