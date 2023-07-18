@@ -1,0 +1,9 @@
+name: tutorial
+
+entry_points:
+  main:
+    parameters:
+      model: {type: str, default: AutoRec}
+      config_name: {type: str, default: baseline}
+      # num_hidden: {type: int, default: 64}
+    command: "python train.py --model {model} --config_name {config_name}"

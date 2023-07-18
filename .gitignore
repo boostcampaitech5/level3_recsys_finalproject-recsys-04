@@ -163,3 +163,4 @@ cython_debug/
 poetry.lock 
 
 CF/saved/
+mlruns/

@@ -42,9 +42,18 @@ class BaseTrainer:
 
 class DeepLearningTrainer(BaseTrainer):
     def __init__(
-        self, model, train_set, test_set, train_loader, test_loader, logger, config
+        self,
+        model,
+        train_set,
+        test_set,
+        train_loader,
+        test_loader,
+        logger,
+        config,
     ):
-        super(DeepLearningTrainer, self).__init__(model, train_set, test_set, logger)
+        super(DeepLearningTrainer, self).__init__(
+            model, train_set, test_set, logger
+        )
 
         self.train_loader = train_loader
         self.test_loader = test_loader
@@ -71,7 +80,9 @@ class DeepLearningTrainer(BaseTrainer):
 
                 self.model.zero_grad()
                 reconstruction = self.model(input_vec)
-                loss = self.loss_f(reconstruction * input_mask, input_vec * input_mask)
+                loss = self.loss_f(
+                    reconstruction * input_mask, input_vec * input_mask
+                )
                 loss.backward()
                 self.optm.step()
 
@@ -87,6 +98,8 @@ class DeepLearningTrainer(BaseTrainer):
         self.logger.info(
             f"|| Best epoch: {epoch} || Best_rmse: {best_rmse:.6f} || Best_epoch: {best_epoch}"
         )
+
+        return self.model, best_rmse, best_epoch
 
     def get_metrics(self) -> np.float32:
         super().ready_to_get_metrics()
@@ -111,7 +124,9 @@ class DeepLearningTrainer(BaseTrainer):
 
 class ClosedFormTrainer(BaseTrainer):
     def __init__(self, model, train_set, test_set, logger, config):
-        super(ClosedFormTrainer, self).__init__(model, train_set, test_set, logger)
+        super(ClosedFormTrainer, self).__init__(
+            model, train_set, test_set, logger
+        )
 
     def run(self):
         self.model.fit(self.train_set.data)
@@ -119,15 +134,19 @@ class ClosedFormTrainer(BaseTrainer):
         rmse = self.get_metrics()
         self.logger.info(f"|| Evaluation_RMSE: {rmse:.6f}")
 
+        return self.model, rmse, 1
+
     def get_metrics(self) -> np.float32:
         super().ready_to_get_metrics()
 
         # Predict the test matrix
-        # preds = test_mat.dot(self.model.B)
+        # preds = self.test_mat.dot(self.model.B)
         preds = self.model.pred
 
         for item, user in product(self.unseen_items, self.unseen_users):
             if self.test_mask[user, item]:
                 preds[user, item] = 3
 
-        return self.masked_rmse(actual=self.test_mat, pred=preds, mask=self.test_mask)
+        return self.masked_rmse(
+            actual=self.test_mat, pred=preds, mask=self.test_mask
+        )

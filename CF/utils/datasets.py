@@ -101,17 +101,21 @@ def preprocess_for_train(
     data["item"] -= 1
 
     train, test = train_test_split(data.values, test_size=config["test_ratio"])
+    origin = data.values
 
     train_mat = np.zeros((num_users, num_items))
     test_mat = np.zeros((num_users, num_items))
+    origin_mat = np.zeros((num_users, num_items))
 
     for user, item, rating in train:
         train_mat[user, item] = rating
     for user, item, rating in test:
         test_mat[user, item] = rating
+    for user, item, rating in origin:
+        origin_mat[user, item] = rating
 
     save_encoders(user_enc, item_enc, num_users, num_items, "./saved")
-    return train_mat, test_mat, num_users, num_items
+    return origin_mat, train_mat, test_mat, num_users, num_items
 
 
 def preprocess_for_inference(

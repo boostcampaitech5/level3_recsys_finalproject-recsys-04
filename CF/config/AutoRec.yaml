@@ -7,14 +7,14 @@ baseline:
     shuffle: true
     test_ratio: 0.1
   model: AutoRec
-  model_params: 
+  model_params:
     num_users: None
-    num_items: None
+    num_items: None 
     num_hidden: 64
     dropout: 0.1
   trainer: DeepLearningTrainer
   trainer_params:
-    epochs: 300
+    epochs: 100
     lr: 0.01
     weight_decay: 0.005
     device: cuda
