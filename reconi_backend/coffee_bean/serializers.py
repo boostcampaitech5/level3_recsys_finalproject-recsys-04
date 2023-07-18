@@ -20,7 +20,6 @@ class CoffeeBeanOriginSerializer(serializers.ModelSerializer):
 
 
 class CoffeeBeanOriginsSerializer(serializers.ModelSerializer):
-    # origin = CoffeeBeanOriginSerializer()
     origin = serializers.StringRelatedField()
 
     class Meta:

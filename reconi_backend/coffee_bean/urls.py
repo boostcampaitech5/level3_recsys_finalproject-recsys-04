@@ -29,6 +29,7 @@ router.register(r"bean-origin", CoffeeBeanOriginViewSet)
 router.register(r"bean-origins", CoffeeBeanOriginsViewSet)
 router.register(r"bean-reviews", CoffeeBeanReviewViewSet)
 
+
 urlpatterns = [
     # ViewSet 라우터를 추가합니다.
     path("v1/", include(router.urls)),

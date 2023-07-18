@@ -65,9 +65,6 @@ class CoffeeBeanReview(models.Model):
     def __str__(self):
         return str(self.user_nickname + "-" + self.bean_id.title)
 
-    def __str__(self):
-        return str(self.user_nickname + "-" + self.bean_id.title)
-
     class Meta:
         managed = False
         db_table = "coffee_bean_beanreview"
