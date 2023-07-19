@@ -1,7 +1,7 @@
 <template>
   <div class="container d-md-flex align-items-stretch">
     <!-- Page Content -->
-    <div id="content" class="p-4 p-md-5 pt-5">
+    <div id="content" class="p-4 p-md-5 pt-5" @scroll="handleNotificationListScroll">
       <h2 class="mb-4">당신이 찾는 모든 커피</h2>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
@@ -21,13 +21,10 @@
         occaecat cupidatat non proident, sunt in culpa qui officia deserunt
         mollit anim id est laborum.
       </p>
-      <!-- {{ prev }}
-      {{ next }} -->
-      {{ bean_data }}
 
       <b-container
         class="bv-example-row mr-4"
-        style="display: flex; flex-wrap: wrap; justify-content: space-around;"
+        style="display: flex; flex-wrap: wrap; justify-content: space-around"
       >
         <Card
           v-for="bean in bean_data"
@@ -37,6 +34,7 @@
           class="mt-4"
         />
       </b-container>
+      <b-button block variant="primary" @click="handleNotificationListScroll" class="mt-4">더 많은 원두 보기</b-button>
     </div>
 
     <nav id="sidebar">
@@ -136,7 +134,6 @@ import axios from "axios";
 
 export default {
   name: "products-main",
-
   components: {
     Card,
   },
@@ -160,7 +157,7 @@ export default {
         .get("http://localhost:3000/category")
         .then((getted) => {
           origins.value = getted.data.origin;
-          roasteries.value = getted.data.roastery
+          roasteries.value = getted.data.roastery;
         })
         .catch(() => {
           console.log("실패😘");
@@ -179,11 +176,40 @@ export default {
           console.log("실패😘");
         });
     }
+    function getNextPage() {
+      axios
+        .get(next.value)
+        .then((getted) => {
+          console.log(getted)
+          prev.value = getted.data.previous;
+          next.value = getted.data.next;
+          bean_data.value = bean_data.value.concat(getted.data.results);
+          console.log("실행됨");
+        })
+        .catch((e) => {
+          console.log("실패😘");
+          console.log(e);
+        });
+    }
+
+    function handleNotificationListScroll(e) {
+      const { scrollHeight, scrollTop, clientHeight } = e.target;
+      console.log(scrollHeight, scrollTop, clientHeight)
+      const isAtTheBottom = scrollHeight === scrollTop + clientHeight;
+      if (isAtTheBottom) {
+        // setTimeout(() => getNextPage(), 1000);
+        getNextPage()
+      }
+    }
 
     onMounted(() => {
       getOrigins();
       getinitpage();
     });
+
+
+
+    
 
     return {
       acidRange,
@@ -196,6 +222,8 @@ export default {
       bean_data,
       prev,
       next,
+      getNextPage,
+      handleNotificationListScroll,
     };
   },
 };
