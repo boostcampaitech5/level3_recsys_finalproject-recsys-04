@@ -21,10 +21,21 @@
         occaecat cupidatat non proident, sunt in culpa qui officia deserunt
         mollit anim id est laborum.
       </p>
-      <b-container class="bv-example-row">
-        <b-row class="pt-5" v-for="num in 10" :key="num">
-          <b-col v-for="n in 3" :key="n"> <Card /> </b-col>
-        </b-row>
+      <!-- {{ prev }}
+      {{ next }} -->
+      {{ bean_data }}
+
+      <b-container
+        class="bv-example-row mr-4"
+        style="display: flex; flex-wrap: wrap; justify-content: space-around;"
+      >
+        <Card
+          v-for="bean in bean_data"
+          :key="bean"
+          :bean="bean"
+          style="width: 250px"
+          class="mt-4"
+        />
       </b-container>
     </div>
 
@@ -91,21 +102,26 @@
         </ul>
         <div class="mb-5">
           <h5>원산지</h5>
-          <div class="tagcloud">
-            <a href="#" class="tag-cloud-link">dish</a>
-            <a href="#" class="tag-cloud-link">menu</a>
-            <a href="#" class="tag-cloud-link">food</a>
-            <a href="#" class="tag-cloud-link">sweet</a>
-            <a href="#" class="tag-cloud-link">tasty</a>
-            <a href="#" class="tag-cloud-link">delicious</a>
-            <a href="#" class="tag-cloud-link">desserts</a>
-            <a href="#" class="tag-cloud-link">dish</a>
-            <a href="#" class="tag-cloud-link">menu</a>
-            <a href="#" class="tag-cloud-link">food</a>
-            <a href="#" class="tag-cloud-link">sweet</a>
-            <a href="#" class="tag-cloud-link">tasty</a>
-            <a href="#" class="tag-cloud-link">delicious</a>
-            <a href="#" class="tag-cloud-link">desserts</a>
+          <div class="tagcloud mt-4">
+            <a
+              href="#"
+              class="tag-cloud-link"
+              v-for="origin in this.origins"
+              :key="origin"
+              >{{ origin }}</a
+            >
+          </div>
+        </div>
+        <div class="mb-5">
+          <h5>로스터리</h5>
+          <div class="tagcloud mt-4">
+            <a
+              href="#"
+              class="tag-cloud-link"
+              v-for="roastery in this.roasteries"
+              :key="roastery"
+              >{{ roastery }}</a
+            >
           </div>
         </div>
       </div>
@@ -115,24 +131,90 @@
 
 <script>
 import Card from "./Card.vue";
+import { ref, onMounted, computed } from "vue";
+import axios from "axios";
 
 export default {
   name: "products-main",
-  data() {
-    return {
-      acidRange:[],
-      sweetyRange:[],
-      bodyRange:[],
-      roastRange:[],
-    };
-  },
-  watch: {
-    acidValue() {
-      console.log(this.acidValue);
-    },
-  },
+
   components: {
     Card,
+  },
+  // composition API
+  setup() {
+    var acidRange = ref([]);
+    var sweetyRange = ref([]);
+    var bodyRange = ref([]);
+    var roastRange = ref([]);
+
+    var page = ref(0);
+    var prev = ref("");
+    var next = ref("");
+    var bean_data = ref([]);
+
+    var origins = ref([]);
+    var roasteries = ref([]);
+
+    function getOrigins() {
+      axios
+        .get("http://localhost:3000/category")
+        .then((getted) => {
+          origins.value = getted.data.origin;
+          roasteries.value = getted.data.roastery
+        })
+        .catch(() => {
+          console.log("실패😘");
+        });
+    }
+
+    function getinitpage() {
+      axios
+        .get("http://localhost:3000/page")
+        .then((getted) => {
+          prev.value = getted.data[0].previous;
+          next.value = getted.data[0].next;
+          // console.log(getted.data[0].results)
+          bean_data.value = bean_data.value.concat(getted.data[0].results);
+        })
+        .catch(() => {
+          console.log("실패😘");
+        });
+    }
+
+    onMounted(() => {
+      // axios.get('http://127.0.0.1:8000/api/v1/bean-origin/').then((getted)=>{
+      //   console.log(getted)
+      //   origins.value = getted.data
+      // }).catch(()=>{
+      //   console.log('실패😘')
+      // })
+      getOrigins();
+      getinitpage();
+    });
+
+    const numProductsLow = computed(() => {
+      return Math.floor(bean_data.value.length / 3);
+    });
+
+    const remainProductsNum = computed(() => {
+      return bean_data.value.length % 3;
+    });
+
+    return {
+      acidRange,
+      sweetyRange,
+      bodyRange,
+      roastRange,
+      origins,
+      roasteries,
+      page,
+      bean_data,
+      prev,
+      next,
+
+      numProductsLow,
+      remainProductsNum,
+    };
   },
 };
 </script>
