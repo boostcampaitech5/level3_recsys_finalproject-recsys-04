@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import yaml
 
-from typing import Tuple
+from typing import List, Tuple
 
 from sklearn.preprocessing import MinMaxScaler
 
@@ -22,8 +22,11 @@ def load_config(args):
     return config
 
 
-def validate_config(config):
-    # config["target_item_name"]과 config["target_user_name"] 둘 중 하나에만 값이 있어야 유효
+def validate_config(config) -> bool:
+    """
+    타겟 아이템과 타겟 유저 여부를 검사해, 추천에 유효한 설정인지 검사합니다.
+    """
+    # 타겟 아이템과 타겟 유저 중 하나에만 값이 있어야 유효
     if bool(config["target_item_name"]) == bool(config["target_user_name"]):
         print("유저와 아이템 중 하나에 타겟을 설정하세요.")
         return False
@@ -31,17 +34,17 @@ def validate_config(config):
     return True
 
 
-def load_data(config) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def load_data(config) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     콘텐츠 기반 필터링에 필요한 데이터를 불러옵니다.
 
     Parameters
     ----------
-    config : 데이터 파일 경로를 포함한 설정 정보
+    config : 데이터 경로 등의 설정 정보
 
     Returns
     -------
-    Tuple[pd.DataFrame, pd.DataFrame] : 전처리가 완료된 데이터셋과, 유사도 계산에 쓰일 아이템 행렬
+    Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame] : 전처리가 완료된 아이템 데이터셋, 아이템 프로파일, 유저 프로파일
     """
 
     # 전처리 된 데이터셋 경로
@@ -50,13 +53,13 @@ def load_data(config) -> Tuple[pd.DataFrame, pd.DataFrame]:
         "preprocessed_data.csv",
     )
 
-    merged_data = pd.read_csv(config["merged_data_path"])
+    inter_data = pd.read_csv(config["interaction_data_path"])
 
     if os.path.exists(preprocessed_data):  # 전처리 된 데이터셋이 존재하면 해당 데이터셋을 로드
         data = pd.read_csv(preprocessed_data)
     else:  # 그렇지 않으면 아이템 데이터와 통합 데이터를 불러와 전처리 진행
         item_data = pd.read_csv(config["item_data_path"])
-        data = preprocess(item_data, merged_data, config)
+        data = preprocess(item_data, inter_data, config)
 
     features_to_use = [
         "Cupping Note 향미",
@@ -71,12 +74,10 @@ def load_data(config) -> Tuple[pd.DataFrame, pd.DataFrame]:
     item_profile = build_item_profile(data, features_to_use, config)
 
     # 유저 프로파일
-    user_profile = build_user_profile(
-        merged_data, data, features_to_use, config
-    )
+    user_profile = build_user_profile(inter_data, data, features_to_use, config)
 
     if config["target_item_name"]:  # 타겟 아이템이 있으면
-        # 키워드 관련 피쳐 추가
+        # 아이템 프로파일에 키워드 관련 피쳐 추가
         keyword_feature_path = os.path.join(
             config["result_path"],
             config["target_item_name"],
@@ -95,7 +96,7 @@ def load_data(config) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def preprocess(
-    item_data: pd.DataFrame, merged_data: pd.DataFrame, config
+    item_data: pd.DataFrame, inter_data: pd.DataFrame, config
 ) -> pd.DataFrame:
     """
     콘텐츠 기반 필터링에 사용할 데이터셋(원두 데이터)의 전처리를 진행합니다.
@@ -105,10 +106,10 @@ def preprocess(
     item_data : pd.DataFrame
         아이템 정보를 담고 있는 데이터셋
 
-    merged_data : pd.DataFrame
-        아이템과 리뷰 정보를 담고 있는 통합 데이터셋
+    inter_data : pd.DataFrame
+        아이템과 유저의 인터랙션 정보를 담고 있는 데이터셋
 
-    config : 전처리 된 데이터셋의 저장 경로를 포함한 설정 정보
+    config : 데이터 경로 등의 설정 정보
 
     Returns
     -------
@@ -127,7 +128,7 @@ def preprocess(
     item_data.loc[mask, "상품명"] = change_bean_name(item_data.loc[mask, "상품명"])
 
     ### 2. 피쳐 엔지니어링 - 리뷰 관련 피쳐 추가
-    data = feature_engineering(item_data, merged_data, config)
+    data = feature_engineering(item_data, inter_data, config)
 
     ### 2.5. 로스팅 포인트 단위 통일 - DB에는 변경되어 올라가므로 추후 제거
     data = change_roasting_point(data)
@@ -175,69 +176,29 @@ def save_data(data: pd.DataFrame, save_dir: str, file_name: str) -> None:
     data.to_csv(file_path, index=False)
 
 
-def make_item_matrix(data: pd.DataFrame, config) -> pd.DataFrame:
-    """
-    사용할 피쳐 선정 및 스케일링을 진행하여, 유사도 계산에 쓰일 아이템 행렬을 완성합니다.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        전처리 된 아이템 데이터셋
-
-    Returns
-    -------
-    pd.DataFrame : 유사도 계산에 쓰일 아이템 행렬
-    """
-
-    features_to_use = [
-        "Cupping Note 향미",
-        "Cupping Note 산미",
-        "Cupping Note 단맛",
-        "Cupping Note 바디감",
-        "Roasting Point",
-        "리뷰 수",
-        "keywords_jaccard_similarity",
-    ]
-    item_matrix = data.set_index("상품명")[features_to_use].copy()
-    item_matrix = scaling(item_matrix)
-
-    save_data(
-        item_matrix,
-        os.path.join(config["result_path"], config["target_item_name"]),
-        "item_matrix.csv",
-    )
-
-    return item_matrix
-
-
 def build_item_profile(
-    data: pd.DataFrame, features_to_use, config
+    item_data: pd.DataFrame, features_to_use: List[str], config
 ) -> pd.DataFrame:
     """
-    사용할 피쳐 선정 및 스케일링을 진행하여, 유사도 계산에 쓰일 아이템 행렬을 완성합니다.
+    사용할 피쳐의 값만 추출하고 정규화를 진행하여, 유사도 계산에 쓰일 아이템 프로파일 벡터를 완성합니다.
 
     Parameters
     ----------
-    data : pd.DataFrame
-        전처리 된 아이템 데이터셋
+    item_data : pd.DataFrame
+        아이템 데이터셋
+
+    features_to_use : List[str]
+        사용할 피쳐 이름을 담은 리스트
+
+    config : 데이터 경로 등의 설정 정보
 
     Returns
     -------
-    pd.DataFrame : 유사도 계산에 쓰일 아이템 행렬
+    pd.DataFrame : 유사도 계산에 쓰일 아이템 프로파일 벡터
     """
-
-    # features_to_use = [
-    #     "Cupping Note 향미",
-    #     "Cupping Note 산미",
-    #     "Cupping Note 단맛",
-    #     "Cupping Note 바디감",
-    #     "Roasting Point",
-    #     "리뷰 수",
-    #     "keywords_jaccard_similarity",
-    # ]
-    item_profile = data[features_to_use].copy()
+    item_profile = item_data[features_to_use].copy()
     item_profile = scaling(item_profile)  # 정규화
-    item_profile.insert(0, "item_id", data["상품명"])
+    item_profile.insert(0, "item_id", item_data["상품명"])
 
     save_data(
         item_profile,
@@ -248,7 +209,32 @@ def build_item_profile(
     return item_profile
 
 
-def build_user_profile(inter_data, item_data, features_to_use, config):
+def build_user_profile(
+    inter_data: pd.DataFrame,
+    item_data: pd.DataFrame,
+    features_to_use: List[str],
+    config,
+) -> pd.DataFrame:
+    """
+    사용할 피쳐의 값만 추출하고 정규화를 진행하여, 유사도 계산에 쓰일 유저 프로파일 벡터를 완성합니다.
+
+    Parameters
+    ----------
+    inter_data : pd.DataFrame
+        인터랙션 데이터셋
+
+    item_data : pd.DataFrame
+        아이템 데이터셋
+
+    features_to_use : List[str]
+        사용할 피쳐 이름을 담은 리스트
+
+    config : 데이터 경로 등의 설정 정보
+
+    Returns
+    -------
+    pd.DataFrame : 유사도 계산에 쓰일 유저 프로파일 벡터
+    """
     # 각 유저에 대한 아이템 구매 이력 리스트 생성
     item_set_for_each_user = {}
     for user_name in inter_data["구매자 이름"].unique():

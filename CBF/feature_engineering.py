@@ -12,7 +12,7 @@ from typing import List, Set
 
 
 def feature_engineering(
-    item_data: pd.DataFrame, merged_data: pd.DataFrame, config
+    item_data: pd.DataFrame, inter_data: pd.DataFrame, config
 ):
     """
     아이템 데이터셋에 대해 새로운 피쳐를 만들어 추가합니다.
@@ -22,8 +22,8 @@ def feature_engineering(
     item_data : pd.DataFrame
         아이템 정보를 담고 있는 데이터셋
 
-    merged_data : pd.DataFrame
-        아이템과 리뷰 정보를 담고 있는 통합 데이터셋
+    inter_data : pd.DataFrame
+        아이템과 유저의 인터랙션 정보를 담고 있는 데이터셋
 
     config : 타겟 아이템 이름을 포함한 설정 정보
 
@@ -31,10 +31,9 @@ def feature_engineering(
     -------
     pd.DataFrame : 피쳐가 추가된 데이터셋
     """
-
-    ### 1. 통합 데이터의 리뷰 관련 데이터로부터 피쳐 생성
+    # 통합 데이터의 리뷰 관련 데이터로부터 피쳐 생성
     review_features = (
-        merged_data.groupby("상품명")["구매자 평점"]
+        inter_data.groupby("상품명")["구매자 평점"]
         .agg(["mean", "count"])
         .reset_index()
         .rename(columns={"mean": "평점", "count": "리뷰 수"})
@@ -44,17 +43,28 @@ def feature_engineering(
 
     data = item_data.merge(review_features, how="left")
 
-    # if config["target_item_name"]:
-    #     make_keyword_feature(data, config)
-
     return data
 
 
-def make_keyword_feature(data, config):
-    ### 키워드 추출 - 키워드 피쳐 생성
+def make_keyword_feature(data: pd.DataFrame, config) -> pd.DataFrame:
+    """
+    키워드를 추출하고, 키워드 간 자카드 유사도를 계산하여 피쳐를 생성합니다.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        텍스트 피쳐를 포함하는 데이터셋
+
+    config : 데이터 경로 등의 설정 정보
+
+    Returns
+    -------
+    pd.DataFrame : 생성한 키워드 피쳐가 담긴 데이터프레임
+    """
+    # 키워드 추출
     data = extract_keywords(data)
 
-    ### 타겟 아이템과 이외 아이템들의 키워드 간 자카드 유사도를 계산해 피쳐 생성
+    # 타겟 아이템과 이외 아이템들의 키워드 간 자카드 유사도를 계산해 피쳐 생성
     target = data[data["상품명"] == config["target_item_name"]]  # 타겟 아이템 지정
 
     # 타겟 아이템에 대한 키워드 자카드 유사도 계산
@@ -90,6 +100,8 @@ def nouns_extractor(text: str, kiwi) -> str:
     text : str
         명사를 추출할 대상이 되는 텍스트
 
+    kiwi : 한국어 형태소 분석기 인스턴스
+
     Returns
     -------
     str : 입력 받은 텍스트로부터 명사만 추출해 남긴 텍스트
@@ -99,9 +111,6 @@ def nouns_extractor(text: str, kiwi) -> str:
     >>> nouns_extractor("이것은 예시입니다.")
     이것 예시
     """
-
-    # kiwi = Kiwi()
-
     nouns_list = []
     result = kiwi.analyze(text)
     for token, pos, _, _ in result[0][0]:

@@ -99,7 +99,6 @@ def main(args):
     )
 
     # 결과 기록
-    # target_name = config["target_item_name"]
     topk = config["topk"]
 
     mlflow.log_param("target_name", target_name)
@@ -122,6 +121,8 @@ def get_recommendation_result(
 
     Parameters
     ----------
+    config : 데이터 경로 등의 설정 정보
+
     target_name : str
         타겟 아이템의 이름
 
@@ -151,7 +152,8 @@ def get_recommendation_result(
     recommended_items_df = items.iloc[recom_idx, :]
 
     target_name_list = np.full(len(range(k)), target_name)
-    if config["target_item_name"]:
+
+    if config["target_item_name"]:  # 타겟 아이템 기반 추천
         target_roastery_list = np.full(
             len(range(k)), items[items["상품명"] == target_name]["로스터리"].values
         )
@@ -164,7 +166,7 @@ def get_recommendation_result(
             "cosine_similarity": cosine_similarity,
         }
 
-    else:
+    else:  # 타겟 유저 기반 추천
         recommendation_result = {
             "target_user_name": target_name_list,
             "recommended_item_name": recom_name,
