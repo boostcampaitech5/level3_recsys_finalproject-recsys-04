@@ -131,7 +131,7 @@
 
 <script>
 import Card from "./Card.vue";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 
 export default {
@@ -173,7 +173,6 @@ export default {
         .then((getted) => {
           prev.value = getted.data[0].previous;
           next.value = getted.data[0].next;
-          // console.log(getted.data[0].results)
           bean_data.value = bean_data.value.concat(getted.data[0].results);
         })
         .catch(() => {
@@ -182,22 +181,8 @@ export default {
     }
 
     onMounted(() => {
-      // axios.get('http://127.0.0.1:8000/api/v1/bean-origin/').then((getted)=>{
-      //   console.log(getted)
-      //   origins.value = getted.data
-      // }).catch(()=>{
-      //   console.log('실패😘')
-      // })
       getOrigins();
       getinitpage();
-    });
-
-    const numProductsLow = computed(() => {
-      return Math.floor(bean_data.value.length / 3);
-    });
-
-    const remainProductsNum = computed(() => {
-      return bean_data.value.length % 3;
     });
 
     return {
@@ -211,9 +196,6 @@ export default {
       bean_data,
       prev,
       next,
-
-      numProductsLow,
-      remainProductsNum,
     };
   },
 };
