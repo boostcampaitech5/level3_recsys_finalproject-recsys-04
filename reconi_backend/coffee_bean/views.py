@@ -1,5 +1,6 @@
+from rest_framework.permissions import AllowAny
 from rest_framework import viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
@@ -74,6 +75,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         ],
     )
     @action(detail=False, methods=["get"])
+    @permission_classes([AllowAny])
     def category_filtered(self, request):
         # 필터를 적용할 queryset
         queryset = CoffeeBean.objects.all()
@@ -103,6 +105,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
+    @permission_classes([AllowAny])
     def paginated_list(self, request):
         # 페이지네이션을 적용한 전체 커피 원두 아이템을 가져옵니다.
         paginated_coffee_beans = self.paginate_queryset(self.queryset)
@@ -112,6 +115,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(detail=False, methods=["get"])
+    @permission_classes([AllowAny])
     def random_items(self, request):
         # 전체 커피 원두 아이템을 가져옵니다.
         all_coffee_beans = CoffeeBean.objects.all()
@@ -125,6 +129,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
+    @permission_classes([AllowAny])
     def unique_categories(self, request):
         # 중복 제거된 모든 roastery 값을 가져옵니다.
         unique_roastery_values = (

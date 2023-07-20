@@ -16,6 +16,16 @@ from pathlib import Path
 
 import environ
 
+
+def create_file_if_not_exists(file_path):
+    # 파일이 존재하는지 확인
+    if not os.path.exists(file_path):
+        # 파일이 존재하지 않으면 경로와 파일 생성
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w") as f:
+            f.write("")
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
@@ -143,8 +153,8 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.AllowAny",  # 누구나 접근 가능
-        # 'rest_framework.permissions.IsAuthenticated', # 인증된 사용자만 접근 가능
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",  # or allow read-only access for unauthenticated users.
+        # "rest_framework.permissions.IsAuthenticated",  # 인증된 사용자만 접근 가능
         # 'rest_framework.permissions.IsAdminUser', # 관리자만 접근 가능
     ),
     "DEFAULT_RENDERER_CLASSES": (
@@ -153,8 +163,8 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.BrowsableAPIRenderer",
     ),
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        # "rest_framework.authentication.SessionAuthentication",  # 세션 인증을 사용하는 경우
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",  # 세션 인증을 사용하는 경우
     ],
 }
 
@@ -224,6 +234,8 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", "3306"),
     },
 }
+
+create_file_if_not_exists(os.path.join(BASE_DIR, "logs", "user_logs.log"))
 
 LOGGING = {
     "version": 1,
