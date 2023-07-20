@@ -6,7 +6,7 @@
       img-alt="Image"
       img-top
       tag="article"
-      style="max-width: 20rem;"
+      style="max-width: 20rem"
       class="mb-2"
       :style="styleObject"
     >
@@ -15,7 +15,7 @@
         {{ bean?.description }}
       </b-card-text>
 
-      <b-button variant="outline-primary">원두 보러가기</b-button>
+      <b-button variant="outline-primary" @click="$emit('openModal', bean)">원두 보러가기</b-button>
     </b-card>
   </div>
 </template>
@@ -28,15 +28,13 @@ export default {
   },
   data() {
     return {
-      styleObject:{
-        fontSize:'10px'
-      }
+      styleObject: {
+        fontSize: "10px",
+        modalShow: false,
+      },
     };
   },
-
 };
 </script>
 
-<style>
-
-</style>
+<style></style>

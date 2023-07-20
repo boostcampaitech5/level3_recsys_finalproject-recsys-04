@@ -1,7 +1,17 @@
 <template>
+  <div class="w-full bg-white">
+    <b-modal v-model="this.modalShow" size="xl" title="asdf">
+      해치웠나..
+      {{ this.selectedBean }}
+    </b-modal>
+  </div>
   <div class="container d-md-flex align-items-stretch">
     <!-- Page Content -->
-    <div id="content" class="p-4 p-md-5 pt-5" @scroll="handleNotificationListScroll">
+    <div
+      id="content"
+      class="p-4 p-md-5 pt-5"
+      @scroll="handleNotificationListScroll"
+    >
       <h2 class="mb-4">당신이 찾는 모든 커피</h2>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
@@ -28,13 +38,24 @@
       >
         <Card
           v-for="bean in bean_data"
+          @openModal="
+            this.modalShow = !this.modalShow;
+            this.selectedBean = $event;
+          "
           :key="bean"
           :bean="bean"
           style="width: 250px"
           class="mt-4"
         />
       </b-container>
-      <b-button block variant="primary" @click="handleNotificationListScroll" class="mt-4">더 많은 원두 보기</b-button>
+
+      <b-button
+        block
+        variant="primary"
+        @click="handleNotificationListScroll"
+        class="mt-4"
+        >더 많은 원두 보기</b-button
+      >
     </div>
 
     <nav id="sidebar">
@@ -137,13 +158,20 @@ export default {
   components: {
     Card,
   },
+  data() {
+    return {
+      // modalShow:false,
+    };
+  },
   // composition API
   setup() {
+    // filter 정보
     var acidRange = ref([]);
     var sweetyRange = ref([]);
     var bodyRange = ref([]);
     var roastRange = ref([]);
 
+    // 원두 정보
     var page = ref(0);
     var prev = ref("");
     var next = ref("");
@@ -152,9 +180,13 @@ export default {
     var origins = ref([]);
     var roasteries = ref([]);
 
+    // modal 정보
+    var modalShow = ref(false);
+    var selectedBean = ref(null);
+
     function getOrigins() {
       axios
-        .get("http://localhost:3000/category")
+        .get("http://127.0.0.1:8000/api/v1/coffee-beans/unique_categories/")
         .then((getted) => {
           origins.value = getted.data.origin;
           roasteries.value = getted.data.roastery;
@@ -166,11 +198,12 @@ export default {
 
     function getinitpage() {
       axios
-        .get("http://localhost:3000/page")
+        .get("http://127.0.0.1:8000/api/v1/coffee-beans/?page=1&page_size=30")
         .then((getted) => {
-          prev.value = getted.data[0].previous;
-          next.value = getted.data[0].next;
-          bean_data.value = bean_data.value.concat(getted.data[0].results);
+          console.log(getted);
+          prev.value = getted.data.previous;
+          next.value = getted.data.next;
+          bean_data.value = bean_data.value.concat(getted.data.results);
         })
         .catch(() => {
           console.log("실패😘");
@@ -180,7 +213,7 @@ export default {
       axios
         .get(next.value)
         .then((getted) => {
-          console.log(getted)
+          console.log(getted);
           prev.value = getted.data.previous;
           next.value = getted.data.next;
           bean_data.value = bean_data.value.concat(getted.data.results);
@@ -194,22 +227,19 @@ export default {
 
     function handleNotificationListScroll(e) {
       const { scrollHeight, scrollTop, clientHeight } = e.target;
-      console.log(scrollHeight, scrollTop, clientHeight)
+      console.log(scrollHeight, scrollTop, clientHeight);
       const isAtTheBottom = scrollHeight === scrollTop + clientHeight;
       if (isAtTheBottom) {
         // setTimeout(() => getNextPage(), 1000);
-        getNextPage()
+        getNextPage();
       }
     }
+
 
     onMounted(() => {
       getOrigins();
       getinitpage();
     });
-
-
-
-    
 
     return {
       acidRange,
@@ -222,6 +252,8 @@ export default {
       bean_data,
       prev,
       next,
+      modalShow,
+      selectedBean,
       getNextPage,
       handleNotificationListScroll,
     };
