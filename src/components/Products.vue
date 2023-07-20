@@ -1,8 +1,10 @@
 <template>
   <div class="w-full bg-white">
-    <b-modal v-model="this.modalShow" size="xl" title="asdf">
-      해치웠나..
-      {{ this.selectedBean }}
+    <b-modal v-model="this.modalShow" size="lg" hide-footer>
+      <template #modal-title>
+      </template>
+      <ProductDetail style="display:inline-flex" :selectedBean="this.selectedBean" />
+      <!-- {{ this.selectedBean }} -->
     </b-modal>
   </div>
   <div class="container d-md-flex align-items-stretch">
@@ -150,6 +152,7 @@
 
 <script>
 import Card from "./Card.vue";
+import ProductDetail from "./ProductDetail.vue";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
@@ -157,6 +160,7 @@ export default {
   name: "products-main",
   components: {
     Card,
+    ProductDetail,
   },
   data() {
     return {
@@ -234,7 +238,6 @@ export default {
         getNextPage();
       }
     }
-
 
     onMounted(() => {
       getOrigins();
