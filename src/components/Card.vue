@@ -1,19 +1,21 @@
 <template>
   <div>
     <b-card
-      title="로스터리 / 원두 이름"
+      :subtitle="bean?.roastery"
       img-src="https://picsum.photos/600/300/?image=25"
       img-alt="Image"
       img-top
       tag="article"
       style="max-width: 20rem"
       class="mb-2"
+      :style="styleObject"
     >
+      <b-card-title>{{ bean?.title }}</b-card-title>
       <b-card-text>
-        원두 설명
+        {{ bean?.description }}
       </b-card-text>
 
-      <b-button variant="outline-primary">원두 보러가기</b-button>
+      <b-button variant="outline-primary" @click="$emit('openModal', bean)">원두 보러가기</b-button>
     </b-card>
   </div>
 </template>
@@ -21,6 +23,17 @@
 <script>
 export default {
   name: "main-product-sample-card",
+  props: {
+    bean: Object,
+  },
+  data() {
+    return {
+      styleObject: {
+        fontSize: "10px",
+        modalShow: false,
+      },
+    };
+  },
 };
 </script>
 

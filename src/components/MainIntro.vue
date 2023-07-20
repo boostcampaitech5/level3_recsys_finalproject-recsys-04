@@ -13,7 +13,7 @@
         </p>
       </div>
       <div class="Frame12">
-        <b-button pill variant="outline-danger" class="Frame12-button"
+        <b-button pill variant="danger" class="Frame12-button"
           router-link to="/test"
           >테스트 하기</b-button
         >
@@ -37,7 +37,10 @@ export default {
   justify-content: center;
   align-items: center;
   gap: 20px;
-  background: var(--light-primary-origin, #3563e9);
+  background-image: url('../assets/mainpage/main-sample.jpg');
+  /* background-size : contain; */
+  background-size : 100% 100%;
+  /* background: var(--light-primary-origin, #3563e9); */
 }
 .Frame10 {
   display: flex;
