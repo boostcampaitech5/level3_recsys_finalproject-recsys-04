@@ -15,6 +15,7 @@ from .models import (
     CoffeeBean,
     CoffeeBeanOrigins,
     CoffeeBeanReview,
+    CoffeeInCart,
 )
 
 # Import Serializers
@@ -23,6 +24,7 @@ from .serializers import (
     CoffeeBeanOriginSerializer,
     CoffeeBeanOriginsSerializer,
     CoffeeBeanReviewSerializer,
+    CoffeeInCartSerializer,
 )
 
 
@@ -163,3 +165,70 @@ class CoffeeBeanOriginsViewSet(viewsets.ModelViewSet):
 class CoffeeBeanReviewViewSet(viewsets.ModelViewSet):
     queryset = CoffeeBeanReview.objects.all()
     serializer_class = CoffeeBeanReviewSerializer
+
+
+class CoffeeInCartViewSet(viewsets.ModelViewSet):
+    queryset = CoffeeInCart.objects.all()
+    serializer_class = CoffeeInCartSerializer
+
+    @swagger_auto_schema(
+        method="post",
+        request_body=openapi.Schema(
+            type="object",
+            properties={
+                "coffee_bean_id": openapi.Schema(
+                    type="integer",
+                    description="ID of the coffee bean to be added to the cart.",
+                )
+            },
+        ),
+    )
+    @action(detail=False, methods=["post"])
+    def add_to_cart(self, request):
+        coffee_id = request.data.get("coffee_bean_id")  # 요청 데이터에서 coffee_id 추출
+        user = request.user
+
+        try:
+            coffee_bean = CoffeeBean.objects.get(id=coffee_id)
+        except CoffeeBean.DoesNotExist:
+            return Response({"error": "Invalid coffee_id"}, status=400)
+
+        cart, _ = CoffeeInCart.objects.get_or_create(user=user)
+
+        cart.coffee_beans.add(coffee_bean)
+        serializer = self.get_serializer(cart)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        method="post",
+        request_body=openapi.Schema(
+            type="object",
+            properties={
+                "coffee_bean_id": openapi.Schema(
+                    type="integer",
+                    description="ID of the coffee bean to be removed from the cart.",
+                )
+            },
+        ),
+    )
+    @action(detail=False, methods=["post"])
+    def remove_from_cart(self, request):
+        coffee_bean_id = request.data.get(
+            "coffee_bean_id"
+        )  # 요청 데이터에서 coffee_bean_id 추출
+        user = request.user
+
+        try:
+            coffee_bean = CoffeeBean.objects.get(id=coffee_bean_id)
+        except CoffeeBean.DoesNotExist:
+            return Response({"error": "Invalid coffee_bean_id"}, status=400)
+
+        try:
+            cart = CoffeeInCart.objects.get(user=user)
+        except CoffeeInCart.DoesNotExist:
+            return Response({"error": "Cart is empty"}, status=400)
+
+        cart.coffee_beans.remove(coffee_bean)  # ManyToManyField에서 커피를 제거합니다.
+
+        serializer = self.get_serializer(cart)
+        return Response(serializer.data)

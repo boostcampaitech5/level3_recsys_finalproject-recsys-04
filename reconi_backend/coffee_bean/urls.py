@@ -21,6 +21,7 @@ from .views import (
     CoffeeBeanOriginViewSet,
     CoffeeBeanReviewViewSet,
     CoffeeBeanViewSet,
+    CoffeeInCartViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -28,6 +29,7 @@ router.register(r"coffee-beans", CoffeeBeanViewSet)
 router.register(r"bean-origin", CoffeeBeanOriginViewSet)
 router.register(r"bean-origins", CoffeeBeanOriginsViewSet)
 router.register(r"bean-reviews", CoffeeBeanReviewViewSet)
+router.register(r"coffee-cart", CoffeeInCartViewSet)
 
 
 urlpatterns = [

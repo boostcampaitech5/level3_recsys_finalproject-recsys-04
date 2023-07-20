@@ -6,6 +6,9 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.contrib.auth import get_user_model
+
+ReconiUser = get_user_model()
 
 
 class CoffeeBeanOrigin(models.Model):
@@ -68,3 +71,17 @@ class CoffeeBeanReview(models.Model):
     class Meta:
         managed = False
         db_table = "coffee_bean_beanreview"
+
+
+class CoffeeInCart(models.Model):
+    user = models.OneToOneField(
+        ReconiUser, primary_key=True, on_delete=models.CASCADE
+    )
+    coffee_beans = models.ManyToManyField(CoffeeBean)
+
+    class Meta:
+        managed = False
+        db_table = "coffee_in_cart"
+
+    def __str__(self):
+        return str(self.user.nickname + " - Cart")
