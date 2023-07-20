@@ -151,6 +151,15 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         return Response(unique_categories)
 
     @action(detail=False, methods=["get"])
+    def decaffeinated_coffee_beans(self, request):
+        # 제목에 '디카페인'이 포함된 데이터를 조회합니다.
+        queryset = CoffeeBean.objects.filter(title__icontains="디카페인")
+
+        # Serializer를 통해 직렬화한 후 응답합니다.
+        serializer = CoffeeBeanSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
     def recommended(self, request):
         user = request.user
         # 전체 커피 원두 아이템을 가져옵니다.
