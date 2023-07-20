@@ -46,9 +46,12 @@ INSTALLED_APPS = [
     "drf_yasg",
     # Apps
     "coffee_bean.apps.CoffeeBeanConfig",
+    # CORS
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -87,6 +90,44 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
     ]
 }
+
+# CORS 권한
+CORS_ALLOW_ALL_ORIGINS = True  # <- 모든 호스트 허용
+
+# or
+# CORS_ALLOWED_ORIGINS = [
+# "http://localhost:3000",
+# "http://127.0.0.1:3000"
+# ]
+
+# CORS_ALLOW_CREDENTIALS가 True인 경우, 쿠키가 cross-site HTTP 요청에 포함될 수 있다. 기본값은 False이다.
+CORS_ALLOW_CREDENTIALS = True
+
+
+# 실제 요청에 허용되는 HTTP 동사 리스트이다. 기본값은 다음과 같다:
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# 실제 요청을 할 때 사용될 수 있는 non-standard HTTP 헤더 목록이다. 기본값을 다음과 같다:
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 ## JWT Authenticated
 # REST_FRAMEWORK = {
