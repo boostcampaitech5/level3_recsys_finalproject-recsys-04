@@ -29,7 +29,7 @@ from .serializers import (
 class CoffeeBeanPagination(PageNumberPagination):
     page_size = 30
     page_size_query_param = "page_size"
-    max_page_size = 20
+    max_page_size = 30
 
 
 ######################### V1 #########################

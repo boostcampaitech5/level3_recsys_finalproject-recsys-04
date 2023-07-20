@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import datetime
 from pathlib import Path
 
 import environ
@@ -40,12 +41,20 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # RestFramework
-    "rest_framework",
     # Swagger
     "drf_yasg",
+    # RestFramework
+    "rest_framework",
+    "rest_framework.authtoken",
+    "rest_framework_simplejwt",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
     # Apps
     "coffee_bean.apps.CoffeeBeanConfig",
+    "user.apps.UserConfig",
     # CORS
     "corsheaders",
 ]
@@ -83,12 +92,70 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "reconi_backend.wsgi.application"
 
+AUTH_USER_MODEL = "user.ReconiUser"
+
+JWT_AUTH_COOKIE = "my-app-auth"
+JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"
+
+SITE_ID = 1
+REST_USE_JWT = True
+
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_LOGOUT_ON_GET = True
+LOGOUT_ON_PASSWORD_CHANGE = True
+
+ACCOUNT_FORMS = {"signup": "user.forms.MyCustomSignupForm"}
+
+
+REST_AUTH = {
+    "JWT_AUTH_COOKIE": "my-app-auth",
+    "JWT_AUTH_REFRESH_COOKIE": "my-refresh-token",
+    "REGISTER_SERIALIZER": "user.serializers.ReconiRegisterSerializer",
+    "REGISTER_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
+    "ACCOUNT_UNIQUE_EMAIL": True,
+    "REST_USE_JWT": True,
+    "ACCOUNT_USER_MODEL_USERNAME_FIELD": None,
+    "ACCOUNT_USERNAME_REQUIRED": False,
+    "ACCOUNT_EMAIL_REQUIRED": True,
+    "ACCOUNT_AUTHENTICATION_METHOD": "email",
+    "ACCOUNT_EMAIL_VERIFICATION": "none",
+    "ACCOUNT_LOGOUT_ON_GET": True,
+    "LOGOUT_ON_PASSWORD_CHANGE": True,
+    # "ACCOUNT_ADAPTER": "user.adapters.CustomAccountAdapter",
+}
+
+SIMPLE_JWT = {
+    "USER_ID_FIELD": "email",
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(hours=2),
+    "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
+ACCOUNT_ADAPTER = "user.adapters.CustomAccountAdapter"
+
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
-    ]
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.AllowAny",  # 누구나 접근 가능
+        # 'rest_framework.permissions.IsAuthenticated', # 인증된 사용자만 접근 가능
+        # 'rest_framework.permissions.IsAdminUser', # 관리자만 접근 가능
+    ),
+    "DEFAULT_RENDERER_CLASSES": (
+        # 자동으로 json으로 바꿔줌
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",  # 세션 인증을 사용하는 경우
+    ],
 }
 
 # CORS 권한

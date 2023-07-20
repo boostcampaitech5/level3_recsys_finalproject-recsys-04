@@ -1,4 +1,5 @@
 import logging
+from django.contrib.auth.models import AnonymousUser
 
 
 class LogMiddleware:
@@ -10,9 +11,14 @@ class LogMiddleware:
         user = request.user
         method = request.method
         url = request.path
+
+        if isinstance(user, AnonymousUser):
+            nickname = "AnonymousUser"
+        else:
+            nickname = user.nickname
         logger.info(
             "User %s accessed URL: %s using method: %s.",
-            user.username,
+            nickname,
             url,
             method,
         )

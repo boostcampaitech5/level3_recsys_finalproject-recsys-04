@@ -37,6 +37,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("coffee_bean.urls")),
+    path("user/", include("user.urls")),
     # Swagger 관련 URL 패턴
     path(
         "swagger/",
