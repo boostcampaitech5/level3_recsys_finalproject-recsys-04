@@ -128,7 +128,7 @@ REST_AUTH = {
     "REGISTER_SERIALIZER": "user.serializers.ReconiRegisterSerializer",
     "REGISTER_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
     "ACCOUNT_UNIQUE_EMAIL": True,
-    "REST_USE_JWT": True,
+    "USE_JWT": True,
     "ACCOUNT_USER_MODEL_USERNAME_FIELD": None,
     "ACCOUNT_USERNAME_REQUIRED": False,
     "ACCOUNT_EMAIL_REQUIRED": True,
@@ -136,6 +136,7 @@ REST_AUTH = {
     "ACCOUNT_EMAIL_VERIFICATION": "none",
     "ACCOUNT_LOGOUT_ON_GET": True,
     "LOGOUT_ON_PASSWORD_CHANGE": True,
+    "JWT_AUTH_COOKIE_USE_CSR": True,
     # "ACCOUNT_ADAPTER": "user.adapters.CustomAccountAdapter",
 }
 
@@ -164,7 +165,10 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_AUTHENTICATION_CLASSES": [
         # "rest_framework.authentication.SessionAuthentication",  # 세션 인증을 사용하는 경우
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
     ],
 }
 
