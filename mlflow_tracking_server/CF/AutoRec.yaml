@@ -1,0 +1,23 @@
+baseline:
+  config_name: baseline
+  data_path: /opt/ml/Recommendation-Modeling/data/not_one_entity_inters.csv
+  dataset: TorchDataset
+  dataset_params:
+    batch_size: 64
+    shuffle: true
+    test_ratio: 0.1
+  model: AutoRec
+  model_params:
+    num_users: None
+    num_items: None 
+    num_hidden: 64
+    dropout: 0.1
+  trainer: DeepLearningTrainer
+  trainer_params:
+    epochs: 300
+    lr: 0.0005
+    weight_decay: 0.0001
+    device: cuda
+  topk: 3
+  seed: 0
+    

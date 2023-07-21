@@ -25,6 +25,7 @@ mlflow = "^2.4.2"
 keybert = "^0.7.0"
 kiwipiepy = "^0.15.2"
 transformers = "^4.30.2"
+ipykernel = "^6.24.0"
 
 
 [build-system]

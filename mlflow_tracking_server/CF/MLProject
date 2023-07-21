@@ -1,0 +1,9 @@
+name: tutorial
+
+entry_points:
+  main:
+    parameters:
+      model: {type: str, default: AutoRec}
+      config_name: {type: str, default: baseline}
+      code_dir: {type: str, default: /opt/ml/Recommendation-Modeling/mlflow_tracking_server/CF}
+    command: "python run.py -m {model} -c {config_name} -cd {code_dir}"
