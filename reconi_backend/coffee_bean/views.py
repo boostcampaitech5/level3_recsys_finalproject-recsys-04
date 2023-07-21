@@ -8,7 +8,12 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 import random
+import requests
 from .filters import filter_parameters
+from user.serializers import ReconiUserSerializer
+
+from django.db.models import Q
+from django.conf import settings
 
 # Import Models
 from .models import (
@@ -17,6 +22,7 @@ from .models import (
     CoffeeBeanOrigins,
     CoffeeBeanReview,
     CoffeeInCart,
+    RecommendedCoffeeColdStart,
 )
 
 # Import Serializers
@@ -27,6 +33,10 @@ from .serializers import (
     CoffeeBeanReviewSerializer,
     CoffeeInCartSerializer,
 )
+from django.contrib.auth import get_user_model
+
+
+ReconiUser = get_user_model()
 
 
 class CoffeeBeanPagination(PageNumberPagination):
@@ -41,6 +51,18 @@ class CoffeeBeanPagination(PageNumberPagination):
 class CoffeeBeanOriginViewSet(viewsets.ModelViewSet):
     queryset = CoffeeBeanOrigin.objects.all()
     serializer_class = CoffeeBeanOriginSerializer
+
+
+def add_recommendations_from_predictions(predictions, user):
+    # 'RecommendationsCoffeeColdStart' 모델에 유저와 커피 원두 아이템을 추가
+    rec_coffee, _ = RecommendedCoffeeColdStart.objects.get_or_create(user=user)
+
+    for coffee_pk in predictions:
+        coffee_item = get_object_or_404(CoffeeBean, pk=coffee_pk)
+        rec_coffee.coffee_beans.add(coffee_item)
+
+    # 'RecommendationsCoffeeColdStart' 객체를 저장
+    rec_coffee.save()
 
 
 class CoffeeBeanViewSet(viewsets.ModelViewSet):
@@ -159,15 +181,56 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         serializer = CoffeeBeanSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["post"])
     def recommended(self, request):
         user = request.user
-        # 전체 커피 원두 아이템을 가져옵니다.
-        all_coffee_beans = CoffeeBean.objects.all()
-        # 커피 원두 아이템을 랜덤하게 3개 선택합니다.
-        random_coffee_beans = random.sample(list(all_coffee_beans), 3)
+        data = request.data
+        inference_server_url = getattr(settings, "INFERENCE_COLDSTART", "")
+
+        #### 제출된 Form과 ReconiUserSerializer 기반으로 유저 정보 업데이트
+        user_serializers = ReconiUserSerializer(user, data=data, partial=True)
+        if user_serializers.is_valid():
+            user_serializers.save()
+        else:
+            Response(user_serializers.errors, status=400)
+
+        #### JSON 데이터에서 필요한 정보 추출
+        #### Inference Server에 전달할 데이터 형식에 맞게 Payload를 가공합니다.
+        payload = {
+            "dataframe_records": [
+                {
+                    "aroma": data.get("aroma"),
+                    "acidity": data.get("acidity"),
+                    "sweetness": data.get("sweetness"),
+                    "body_feel": data.get("body_feel"),
+                    "roasting_characteristics": data.get(
+                        "roasting_characteristics"
+                    ),
+                }
+            ]
+        }
+
+        ##### Inference Server에 POST 요청을 보냅니다.
+        try:
+            response = requests.post(inference_server_url, json=payload)
+            predictions = response.json()["predictions"]
+            # {"predictions" : [1,2,3]}
+
+            # Inference 결과 DB 인덱싱
+            add_recommendations_from_predictions(predictions, user)
+
+        except requests.exceptions.RequestException:
+            # 요청이 실패한 경우 에러 메시지를 DRF의 응답으로 반환합니다.
+            return Response(
+                {"error": "Failed to send inference request."}, status=500
+            )
+
+        # 추천된 커피 원두 데이터를 Top 3개만 가져옵니다.
+        recommended_coffee_items = RecommendedCoffeeColdStart.objects.get(
+            user=user
+        )["coffee_beans"][:3]
         # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
-        serializer = CoffeeBeanSerializer(random_coffee_beans, many=True)
+        serializer = CoffeeBeanSerializer(recommended_coffee_items, many=True)
         return Response(serializer.data)
 
 

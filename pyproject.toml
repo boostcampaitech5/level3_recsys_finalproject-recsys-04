@@ -21,6 +21,7 @@ dj-rest-auth = "^4.0.1"
 django-allauth = "^0.54.0"
 djangorestframework-simplejwt = "^5.2.2"
 django-cors-headers = "^4.2.0"
+requests = "^2.31.0"
 
 
 [build-system]

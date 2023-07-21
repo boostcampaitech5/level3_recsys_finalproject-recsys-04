@@ -54,7 +54,10 @@ class ReconiUser(AbstractBaseUser, PermissionsMixin):
     favorite_scent = models.CharField(
         max_length=100, choices=SCENT_CHOICES, blank=True
     )
-
+    # 향미를 나타내는 필드 (0 ~ 10 사이의 값, 기본값 0.0)
+    aroma = models.FloatField(
+        default=0.0, validators=[MinValueValidator(0), MaxValueValidator(10)]
+    )
     # 단맛을 나타내는 필드 (0 ~ 10 사이의 값, 기본값 0.0)
     sweetness = models.FloatField(
         default=0.0, validators=[MinValueValidator(0), MaxValueValidator(10)]

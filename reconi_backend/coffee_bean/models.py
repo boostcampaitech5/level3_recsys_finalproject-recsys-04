@@ -85,3 +85,60 @@ class CoffeeInCart(models.Model):
 
     def __str__(self):
         return str(self.user.nickname + " - Cart")
+
+
+class UserImplicit(models.Model):
+    """
+    User Implicit FeedBack
+    - 회원이 구매 페이지까지 연결된 커피 아이템
+    """
+
+    user = models.OneToOneField(
+        ReconiUser, primary_key=True, on_delete=models.CASCADE
+    )
+    coffee_beans = models.ManyToManyField(CoffeeBean)
+
+    class Meta:
+        managed = True
+        db_table = "user_implicit"
+
+    def __str__(self):
+        return str(self.user.nickname + " - Implicit")
+
+
+class RecommendedCoffeeColdStart(models.Model):
+    """
+    Cold Start User Recommendated Coffee Item
+    - Cold Start 유저에게 추천된 커피 원두 아이템 리스트
+    """
+
+    user = models.OneToOneField(
+        ReconiUser, primary_key=True, on_delete=models.CASCADE
+    )
+    coffee_beans = models.ManyToManyField(CoffeeBean)
+
+    class Meta:
+        managed = True
+        db_table = "rec_coffee_cold_start"
+
+    def __str__(self):
+        return str(self.user.nickname + " - Recommended Coffees")
+
+
+class RecommendedCoffeeUserItem(models.Model):
+    """
+    User-Item Interaction Recommendated Coffee Item
+    -  유저-아이템 Interaction 기반 추천된 커피 원두 아이템 리스트
+    """
+
+    user = models.OneToOneField(
+        ReconiUser, primary_key=True, on_delete=models.CASCADE
+    )
+    coffee_beans = models.ManyToManyField(CoffeeBean)
+
+    class Meta:
+        managed = True
+        db_table = "rec_coffee_user_item"
+
+    def __str__(self):
+        return str(self.user.nickname + " - Recommended Coffees")

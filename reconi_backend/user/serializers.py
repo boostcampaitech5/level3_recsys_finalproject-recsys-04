@@ -33,6 +33,11 @@ class ReconiRegisterSerializer(RegisterSerializer):
         allow_null=True,
         required=False,
     )
+    aroma = serializers.FloatField(
+        validators=[MinValueValidator(0), MaxValueValidator(10)],
+        allow_null=True,
+        required=False,
+    )
     body_feel = serializers.FloatField(
         validators=[MinValueValidator(0), MaxValueValidator(10)],
         allow_null=True,
@@ -74,6 +79,7 @@ class ReconiRegisterSerializer(RegisterSerializer):
         data["age"] = self.validated_data.get("age")
         data["favorite_scent"] = self.validated_data.get("favorite_scent")
         data["sweetness"] = self.validated_data.get("sweetness")
+        data["aroma"] = self.validated_data.get("aroma")
         data["body_feel"] = self.validated_data.get("body_feel")
         data["acidity"] = self.validated_data.get("acidity")
         data["roasting_characteristics"] = self.validated_data.get(
@@ -91,6 +97,7 @@ class ReconiUserSerializer(serializers.ModelSerializer):
             "gender",
             "age",
             "favorite_scent",
+            "aroma",
             "sweetness",
             "body_feel",
             "acidity",
@@ -108,6 +115,7 @@ class ReconiUserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.nickname = validated_data.get("nickname", instance.nickname)
+        instance.aroma = validated_data.get("aroma", instance.aroma)
         instance.gender = validated_data.get("gender", instance.gender)
         instance.age = validated_data.get("age", instance.age)
         instance.favorite_scent = validated_data.get(
