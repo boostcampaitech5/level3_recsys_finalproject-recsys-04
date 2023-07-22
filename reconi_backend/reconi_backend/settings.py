@@ -31,6 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 INFERENCE_COLDSTART = os.getenv("INFERENCE_COLDSTART", "")
+INFERENCE_NOTCOLDSTART = os.getenv("INFERENCE_NOTCOLDSTART", "")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -42,7 +43,6 @@ SECRET_KEY = os.getenv("SECRET_KEY", "")
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
 
 # Application definition
 
@@ -274,15 +274,15 @@ LOGGING = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
+    # {
+    #     # "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    # },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
+    # {
+    #     # "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    # },
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
@@ -305,6 +305,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # STATICFILES_DIRS = [
 #     # os.path.join(BASE_DIR, "coffee_bean", "static"),
 #     # os.path.join(BASE_DIR, "user", "static"),
