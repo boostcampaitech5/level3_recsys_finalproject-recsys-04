@@ -1,84 +1,109 @@
+import os
+
 import numpy as np
 import pandas as pd
 
-import os
 from tqdm import tqdm
 
 from keybert import KeyBERT
 from kiwipiepy import Kiwi
 from transformers import BertModel
 
-from typing import List, Set
+from typing import List, Tuple, Set
 
 
 def feature_engineering(
-    item_data: pd.DataFrame, merged_data: pd.DataFrame, config
-):
+    items: pd.DataFrame,
+    reviews: pd.DataFrame,
+    target_item_ids: List[int] = None,
+    all: bool = False,
+) -> pd.DataFrame:
     """
     아이템 데이터셋에 대해 새로운 피쳐를 만들어 추가합니다.
 
     Parameters
     ----------
-    item_data : pd.DataFrame
-        아이템 정보를 담고 있는 데이터셋
+    items : pd.DataFrame
+        아이템 데이터셋
 
-    merged_data : pd.DataFrame
-        아이템과 리뷰 정보를 담고 있는 통합 데이터셋
+    reviews : pd.DataFrame
+        리뷰 데이터셋
 
-    config : 타겟 아이템 이름을 포함한 설정 정보
+    target_item_ids : List[int]
+        타겟 아이템 아이디 리스트 (CF의 추천 결과)
+
+    all: bool = False
+        - True 이면 타겟 아이템 상관 없이 모든 아이템에 대해 연산
 
     Returns
     -------
     pd.DataFrame : 피쳐가 추가된 데이터셋
     """
 
-    ### 1. 통합 데이터의 리뷰 관련 데이터로부터 피쳐 생성
+    # -- review 데이터로부터 관련 피쳐 생성
     review_features = (
-        merged_data.groupby("상품명")["구매자 평점"]
-        .agg(["mean", "count"])
+        (reviews.groupby("bean_id_id")["rating"].count())
+        .to_frame()
         .reset_index()
-        .rename(columns={"mean": "평점", "count": "리뷰 수"})
+        .rename(columns={"rating": "review_count"})
     )
-    review_features["평점"] = review_features["평점"].round(2)
-    review_features["리뷰 수"] = review_features["리뷰 수"].astype(int)
 
-    data = item_data.merge(review_features, how="left")
+    items = items.merge(
+        review_features, how="left", left_on="id", right_on="bean_id_id"
+    )
 
-    # if config["target_item_name"]:
-    #     make_keyword_feature(data, config)
+    # -- item description으로부터 키워드 관련 피쳐 생성
+    if not os.path.exists(
+        "/opt/ml/Recommendation-Modeling/mlflow_tracking_server/CBF/item-item_cosine_sim.pkl"
+    ):
+        if target_item_ids:  # 타겟이 아이템인 경우 - 즉 콜드 스타트가 아닌 경우
+            for target_item_id in target_item_ids:
+                items = make_keyword_feature(items, target_item_id)
 
-    return data
+        elif all:
+            for item_id in items["id"]:
+                items = make_keyword_feature(items, item_id)
+    else:
+        pass
+
+    return items
 
 
-def make_keyword_feature(data, config):
-    ### 키워드 추출 - 키워드 피쳐 생성
-    data = extract_keywords(data)
+def make_keyword_feature(
+    items: pd.DataFrame, target_item_id: int
+) -> pd.DataFrame:
+    """
+    아이템 데이터셋에 대해 키워드 관련 피쳐를 추가합니다.
 
-    ### 타겟 아이템과 이외 아이템들의 키워드 간 자카드 유사도를 계산해 피쳐 생성
-    target = data[data["상품명"] == config["target_item_name"]]  # 타겟 아이템 지정
+    Parameters
+    ----------
+    items : pd.DataFrame
+        아이템 데이터셋
+
+    target_item_id : int
+        타겟 아이템의 아이디
+
+    Returns
+    -------
+    pd.DataFrame : 키워드 관련 피쳐가 추가된 아이템 데이터셋
+    """
+
+    # 키워드 추출 - 키워드 피쳐 생성
+    items = extract_keywords(items)
+
+    # 타겟 아이템과 이외 아이템들의 키워드 간 자카드 유사도를 계산해 피쳐 생성
+    target = items[items["id"] == target_item_id]  # 타겟 아이템 지정
 
     # 타겟 아이템에 대한 키워드 자카드 유사도 계산
-    keywords_jaccard_similarity_df = data.apply(
+    col_name = f"{target_item_id}_keyword_jaccard_sim"
+    items[col_name] = items.apply(
         lambda row: jaccard_similarity(
             target["keywords_set"].values[0], row["keywords_set"]
         ),
         axis=1,
-    ).to_frame(name="keyword_jaccard_similarity")
-
-    # 피쳐 저장
-    save_path = os.path.join(
-        config["result_path"],
-        config["target_item_name"],
-    )
-    if not os.path.exists(save_path):
-        os.makedirs(save_path, exist_ok=True)
-
-    keywords_jaccard_similarity_df.to_csv(
-        os.path.join(save_path, "keyword_jaccard_similarity.csv"),
-        index=False,
     )
 
-    return keywords_jaccard_similarity_df
+    return items
 
 
 def nouns_extractor(text: str, kiwi) -> str:
@@ -90,6 +115,8 @@ def nouns_extractor(text: str, kiwi) -> str:
     text : str
         명사를 추출할 대상이 되는 텍스트
 
+    kiwi : 한국어 형태소 분석기 인스턴스
+
     Returns
     -------
     str : 입력 받은 텍스트로부터 명사만 추출해 남긴 텍스트
@@ -99,9 +126,6 @@ def nouns_extractor(text: str, kiwi) -> str:
     >>> nouns_extractor("이것은 예시입니다.")
     이것 예시
     """
-
-    # kiwi = Kiwi()
-
     nouns_list = []
     result = kiwi.analyze(text)
     for token, pos, _, _ in result[0][0]:
@@ -113,7 +137,7 @@ def nouns_extractor(text: str, kiwi) -> str:
     return nouns_text
 
 
-def extract_keywords(data: pd.DataFrame) -> pd.DataFrame:
+def extract_keywords(items: pd.DataFrame) -> pd.DataFrame:
     """
     키워드를 추출하여 피쳐를 추가합니다.
 
@@ -126,16 +150,15 @@ def extract_keywords(data: pd.DataFrame) -> pd.DataFrame:
     -------
     pd.DataFrame : 키워드 피쳐가 추가된 데이터셋
     """
-
     kiwi = Kiwi()
 
-    # 명사 추출
+    # -- 명사 추출
     sentences_list = [
         nouns_extractor(text, kiwi)
-        for text in tqdm(data["text"], desc="Extracting nouns")
+        for text in tqdm(items["description"], desc="Extracting nouns")
     ]
 
-    # 키워드 추출
+    # -- 키워드 추출
     model = BertModel.from_pretrained("skt/kobert-base-v1")
     kw_model = KeyBERT(model)
 
@@ -146,10 +169,10 @@ def extract_keywords(data: pd.DataFrame) -> pd.DataFrame:
         )
         keywords_list.append(keywords)
 
-    # 키워드 피쳐 추가
-    data = add_keywords_features(data, keywords_list)
+    # -- 키워드 피쳐 추가
+    items = add_keywords_features(items, keywords_list)
 
-    return data
+    return items
 
 
 def select_unnecessary_keywords(keywords_list: List[str]) -> List[str]:
@@ -224,7 +247,7 @@ def select_unnecessary_keywords(keywords_list: List[str]) -> List[str]:
 
 
 def add_keywords_features(
-    data: pd.DataFrame, keywords_list: List
+    items: pd.DataFrame, keywords_list: List[List[Tuple[str, float]]]
 ) -> pd.DataFrame:
     """
     추출한 키워드를 활용하여 만든 feature를 데이터셋에 추가합니다.
@@ -232,7 +255,7 @@ def add_keywords_features(
     Parameters
     ----------
     data : pd.DataFrame
-        키워드 관련 피쳐를 추가할 데이터셋
+        키워드 관련 피쳐를 추가할 아이템 데이터셋
 
     keywords_list : List[List[Tuple[str, float]]]
         키워드를 담고 있는 리스트
@@ -265,10 +288,10 @@ def add_keywords_features(
         )
         description_keywords_sentence.append(keywords_sentence)
 
-    data["keywords_set"] = description_keywords_list
-    data["keywords_sentence"] = description_keywords_sentence
+    items["keywords_set"] = description_keywords_list
+    items["keywords_sentence"] = description_keywords_sentence
 
-    return data
+    return items
 
 
 def jaccard_similarity(set1: Set[str], set2: Set[str]) -> float:

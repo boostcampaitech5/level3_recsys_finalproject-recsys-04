@@ -1,14 +1,12 @@
 import numpy as np
 import pandas as pd
 
-import os
 import yaml
 
-from typing import Tuple
+from typing import List, Optional
 
-from sklearn.preprocessing import MinMaxScaler
-
-from feature_engineering import feature_engineering, make_keyword_feature
+from feature_engineering import feature_engineering
+from sqlalchemy import create_engine
 
 
 def load_config(args):
@@ -22,260 +20,157 @@ def load_config(args):
     return config
 
 
-def validate_config(config):
-    # config["target_item_name"]과 config["target_user_name"] 둘 중 하나에만 값이 있어야 유효
-    if bool(config["target_item_name"]) == bool(config["target_user_name"]):
-        print("유저와 아이템 중 하나에 타겟을 설정하세요.")
-        return False
+def load_table(query: str) -> pd.DataFrame:
+    """
+    DB에서 아이템 데이터와 리뷰 데이터를 가져옵니다.
 
-    return True
+    Parameters
+    ----------
+    query : str
+        SQL query
+
+    Returns
+    -------
+    pd.DataFrame : 쿼리로 불러온 테이블
+    """
+    URL = "postgresql+psycopg2://yerim:yerim@101.101.210.35:30005/djangodb"
+    engine = create_engine(URL, echo=False)
+
+    table = pd.read_sql_query(query, con=engine)
+
+    return table
 
 
-def load_data(config) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def load_item_profile(
+    target_item_ids: Optional[List[int]] = None, all: bool = False
+) -> pd.DataFrame:
     """
     콘텐츠 기반 필터링에 필요한 데이터를 불러옵니다.
 
     Parameters
     ----------
-    config : 데이터 파일 경로를 포함한 설정 정보
+    target_item_ids: Optional[List[int]
+        - 타겟 아이템 아이디 리스트 (CF의 추천 결과)
+        - 해당 값이 있으면 not cole start, 없으면 cold start (user preference로 추천)
+
+    all: bool = False
+        - True 이면 타겟 아이템 상관 없이 모든 아이템에 대해 연산
 
     Returns
     -------
-    Tuple[pd.DataFrame, pd.DataFrame] : 전처리가 완료된 데이터셋과, 유사도 계산에 쓰일 아이템 행렬
+    pd.DataFrame : 전처리가 완료된, 유사도 계산에 쓰일 아이템 프로파일
     """
+    # -- 데이터셋 로드
+    load_all_items_query = "select * from coffee_bean_bean"
+    load_all_reviews_query = "select * from coffee_bean_beanreview"
+    items = load_table(load_all_items_query)
+    reviews = load_table(load_all_reviews_query)
 
-    # 전처리 된 데이터셋 경로
-    preprocessed_data = os.path.join(
-        config["data_path"],
-        "preprocessed_data.csv",
-    )
+    # -- 전처리
+    items = preprocess(items, reviews, target_item_ids, all=all)
 
-    merged_data = pd.read_csv(config["merged_data_path"])
-
-    if os.path.exists(preprocessed_data):  # 전처리 된 데이터셋이 존재하면 해당 데이터셋을 로드
-        data = pd.read_csv(preprocessed_data)
-    else:  # 그렇지 않으면 아이템 데이터와 통합 데이터를 불러와 전처리 진행
-        item_data = pd.read_csv(config["item_data_path"])
-        data = preprocess(item_data, merged_data, config)
-
+    # -- 피쳐 선택
     features_to_use = [
-        "Cupping Note 향미",
-        "Cupping Note 산미",
-        "Cupping Note 단맛",
-        "Cupping Note 바디감",
-        "Roasting Point",
-        # "리뷰 수",
+        "id",
+        "aroma",
+        "acidity",
+        "sweetness",
+        "body",
+        "roasting_point",
     ]
 
-    # 아이템 프로파일
-    item_profile = build_item_profile(data, features_to_use, config)
+    if target_item_ids or all:  # 타겟이 아이템인 경우 - 즉 콜드 스타트가 아닌 경우, 키워드 관련 피쳐도 추가
+        keywords_jaccard_sim_features = [
+            col for col in items.columns if "keywords_jaccard_sim" in col
+        ]
+        features_to_use += (
+            keywords_jaccard_sim_features  # 값의 범위가 이미 0 ~ 1이므로 10으로 나누지 않음
+        )
 
-    # 유저 프로파일
-    user_profile = build_user_profile(
-        merged_data, data, features_to_use, config
+    # -- 아이템 프로파일 구축
+    item_profile = build_item_profile(
+        items, features_to_use, features_to_use[1:6]
     )
 
-    if config["target_item_name"]:  # 타겟 아이템이 있으면
-        # 키워드 관련 피쳐 추가
-        keyword_feature_path = os.path.join(
-            config["result_path"],
-            config["target_item_name"],
-            "keywords_jaccard_similarity.csv",
-        )
-        if os.path.exists(keyword_feature_path):
-            item_profile["keywords_jaccard_similarity"] = pd.read_csv(
-                keyword_feature_path
-            )
-        else:
-            item_profile["keywords_jaccard_similarity"] = make_keyword_feature(
-                data, config
-            )
-
-    return data, item_profile, user_profile
+    return item_profile
 
 
 def preprocess(
-    item_data: pd.DataFrame, merged_data: pd.DataFrame, config
+    items: pd.DataFrame,
+    reviews: pd.DataFrame,
+    target_item_ids: Optional[List[int]] = None,
+    all: bool = False,
 ) -> pd.DataFrame:
     """
     콘텐츠 기반 필터링에 사용할 데이터셋(원두 데이터)의 전처리를 진행합니다.
 
     Parameters
     ----------
-    item_data : pd.DataFrame
-        아이템 정보를 담고 있는 데이터셋
+    items : pd.DataFrame
+        아이템 데이터셋
 
-    merged_data : pd.DataFrame
-        아이템과 리뷰 정보를 담고 있는 통합 데이터셋
+    reviews : pd.DataFrame
+        리뷰 데이터셋
 
-    config : 전처리 된 데이터셋의 저장 경로를 포함한 설정 정보
+    target_item_ids: Optional[List[int]]
+        타겟 아이템의 id 리스트
+
+    all: bool = False
+        - True 이면 타겟 아이템 상관 없이 모든 아이템에 대해 연산
 
     Returns
     -------
-    pd.DataFrame : 전처리 된 데이터셋
+    pd.DataFrame : 전처리 된 아이템 데이터셋
     """
 
-    ### 1. 사용할 필요 없는 컬럼 제거
-    item_data = item_data.drop(columns=["validation", "coupang link"])
+    # -- 사용할 필요 없는 컬럼 제거
+    items = items.drop(columns=["coupang_link"])
 
-    ### 1.5. 피쳐 엔지니어링 과정에서의 병합을 위한 전처리 - DB 연결 후 변경 or 제거
-    # 통합 데이터의 컬럼명과 통일
-    item_data = item_data.rename(columns={"Bean name": "상품명"})
+    # -- 피쳐 엔지니어링 - 리뷰 관련 피쳐 추가
+    items = feature_engineering(items, reviews, target_item_ids, all=all)
 
-    # 리뷰가 있는 콩스콩스 원두 데이터에 대해 병합을 위해 상품명 통일
-    mask = item_data["로스터리"] == "콩스콩스"
-    item_data.loc[mask, "상품명"] = change_bean_name(item_data.loc[mask, "상품명"])
-
-    ### 2. 피쳐 엔지니어링 - 리뷰 관련 피쳐 추가
-    data = feature_engineering(item_data, merged_data, config)
-
-    ### 2.5. 로스팅 포인트 단위 통일 - DB에는 변경되어 올라가므로 추후 제거
-    data = change_roasting_point(data)
-
-    ### 3. 결측치 처리
+    # -- 결측치 처리
     # 콩스콩스 로스터리에서 리뷰 수가 결측인 경우는 리뷰가 없었기 때문이므로, 해당 경우는 평점과 리뷰 수를 모두 0으로 대체
-    mask_idx = data[
-        (data["로스터리"] == "콩스콩스") & (data["리뷰 수"].isna())
+    mask_idx = items[
+        (items["roastery"] == "콩스콩스") & (items["review_count"].isna())
     ].index  # 리뷰가 없는 콩스콩스 상품들의 인덱스
-    data.loc[mask_idx, ["리뷰 수", "평점"]] = 0
+    items.loc[mask_idx, ["review_count", "rating"]] = 0
 
     # 나머지 리뷰 수 및 평점, 그리고 향미의 결측치들은 모두 중앙값으로 대체
-    for feature_name in ["리뷰 수", "평점", "Cupping Note 향미"]:
-        data = fill_to_median(data, feature_name)
+    for feature_name in ["review_count", "rating", "aroma"]:
+        items = fill_to_median(items, feature_name)
 
-    save_data(
-        data,
-        os.path.join(config["data_path"]),
-        "preprocessed_data.csv",
-    )
-
-    return data
-
-
-def save_data(data: pd.DataFrame, save_dir: str, file_name: str) -> None:
-    """
-    입력 받은 경로에 데이터를 저장합니다.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        저장할 데이터셋
-
-    save_dir : str
-        저장할 디렉토리 경로
-
-    file_name : str
-        저장할 파일명
-    """
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
-    file_path = os.path.join(save_dir, file_name)
-
-    data.to_csv(file_path, index=False)
-
-
-def make_item_matrix(data: pd.DataFrame, config) -> pd.DataFrame:
-    """
-    사용할 피쳐 선정 및 스케일링을 진행하여, 유사도 계산에 쓰일 아이템 행렬을 완성합니다.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        전처리 된 아이템 데이터셋
-
-    Returns
-    -------
-    pd.DataFrame : 유사도 계산에 쓰일 아이템 행렬
-    """
-
-    features_to_use = [
-        "Cupping Note 향미",
-        "Cupping Note 산미",
-        "Cupping Note 단맛",
-        "Cupping Note 바디감",
-        "Roasting Point",
-        "리뷰 수",
-        "keywords_jaccard_similarity",
-    ]
-    item_matrix = data.set_index("상품명")[features_to_use].copy()
-    item_matrix = scaling(item_matrix)
-
-    save_data(
-        item_matrix,
-        os.path.join(config["result_path"], config["target_item_name"]),
-        "item_matrix.csv",
-    )
-
-    return item_matrix
+    return items
 
 
 def build_item_profile(
-    data: pd.DataFrame, features_to_use, config
+    items: pd.DataFrame,
+    features_to_use: List[str],
+    features_to_scale: List[str],
 ) -> pd.DataFrame:
     """
-    사용할 피쳐 선정 및 스케일링을 진행하여, 유사도 계산에 쓰일 아이템 행렬을 완성합니다.
+    사용할 피쳐만 선택하고 각 피쳐의 값의 범위를 통일하여, 유사도 계산에 쓰일 아이템 행렬을 완성합니다.
 
     Parameters
     ----------
-    data : pd.DataFrame
+    items : pd.DataFrame
         전처리 된 아이템 데이터셋
+
+    features_to_use: List[str]
+        유사도 계산에 쓸 피쳐 리스트
+
+    features_to_scale: List[str]
+        각 피쳐의 값의 범위를 통일하기 위해 스케일링 할 피쳐 리스트
 
     Returns
     -------
     pd.DataFrame : 유사도 계산에 쓰일 아이템 행렬
     """
-
-    # features_to_use = [
-    #     "Cupping Note 향미",
-    #     "Cupping Note 산미",
-    #     "Cupping Note 단맛",
-    #     "Cupping Note 바디감",
-    #     "Roasting Point",
-    #     "리뷰 수",
-    #     "keywords_jaccard_similarity",
-    # ]
-    item_profile = data[features_to_use].copy()
-    item_profile = scaling(item_profile)  # 정규화
-    item_profile.insert(0, "item_id", data["상품명"])
-
-    save_data(
-        item_profile,
-        config["data_path"],
-        "item_profile.csv",
-    )
+    # item_profile = items.set_index("id")[features_to_use].copy()
+    item_profile = items[features_to_use].copy()
+    item_profile[features_to_scale] = item_profile[features_to_scale] / 10
 
     return item_profile
-
-
-def build_user_profile(inter_data, item_data, features_to_use, config):
-    # 각 유저에 대한 아이템 구매 이력 리스트 생성
-    item_set_for_each_user = {}
-    for user_name in inter_data["구매자 이름"].unique():
-        item_set_for_each_user[user_name] = set(
-            inter_data[inter_data["구매자 이름"] == user_name]["상품명"]
-        )
-
-    user_profile_list = []
-    user_name_list = []
-
-    for user_name, item_set in item_set_for_each_user.items():
-        items_for_each_user = item_data[
-            (item_data["상품명"].isin(item_set)) & (item_data["로스터리"] == "콩스콩스")
-        ][features_to_use]
-
-        user_profile = items_for_each_user.mean().to_frame().T
-        user_profile_list.append(user_profile)
-        user_name_list.append(user_name)
-
-    user_profile = pd.concat(user_profile_list, ignore_index=True)
-    user_profile = scaling(user_profile)  # 정규화
-
-    user_profile.insert(0, "user_id", user_name_list)
-
-    save_data(user_profile, config["data_path"], "user_profile.csv")
-
-    return user_profile
 
 
 def fill_to_median(data: pd.DataFrame, feature_name: str) -> pd.DataFrame:
@@ -298,68 +193,4 @@ def fill_to_median(data: pd.DataFrame, feature_name: str) -> pd.DataFrame:
         feature_name
     ].median()
 
-    return data
-
-
-def change_bean_name(
-    origin_bean_name: pd.Series,
-) -> pd.Series:  # DB 연결 후 변경 or 제거
-    """
-    아이템 데이터와 통합 데이터의 병합을 위해 원두명을 통일하도록 변경합니다.
-    """
-    changed_bean_name = origin_bean_name.apply(
-        lambda x: x.replace(" ", "")
-    ).apply(lambda x: x.lower())
-
-    return changed_bean_name
-
-
-def change_roasting_point(item_data):  # DB에는 변경되어 올라가므로 추후 제거
-    # 로스팅 포인트 단위 통일
-    item_data.rename(
-        columns={"Rosting Point": "Roasting Point"}, inplace=True
-    )  # 스펠링에 오타가 있어 변경
-
-    transform_roasting_point = {
-        "미디엄 다크 로스팅": 6,
-        "미디엄 로스팅": 5,
-        "[시티/풀시티]": 5.5,
-        "라이트 미디엄 로스팅": 4,
-        "다크 로스팅": 7,
-        "라이트 로스팅": 2,
-        "[풀시티]": 6,
-        "[시티]": 5,
-        "[중볶음]": 4,
-        "[하이/시티]": 4.5,
-        "[중강볶음]": 5,
-        "[약볶음]": 2,
-        "[중볶음/중강볶음]": 4.5,
-        "[풀시티/프랜치]": 6.5,
-        "[하이]": 4,
-        "[플시티/프렌치]": 6.5,
-    }
-
-    item_data["Roasting Point"] = item_data["Roasting Point"].map(
-        transform_roasting_point
-    )
-
-    return item_data
-
-
-def scaling(data: pd.DataFrame) -> pd.DataFrame:
-    """
-    데이터셋의 값들에 대해 최소-최대 정규화를 진행합니다.
-
-    Parameters
-    ----------
-    data : pd.DataFrame
-        정규화 하고자 하는 데이터셋
-
-    Returns
-    -------
-    pd.DataFrame : 정규화 된 데이터셋
-    """
-    scaler = MinMaxScaler()
-    scaled = scaler.fit_transform(data)
-    data = pd.DataFrame(scaled, columns=data.columns)
     return data
