@@ -25,7 +25,7 @@ def main(args):
 
     logger.info("|| Load data")
     # 새로 들어오는 유저 interaction 으로 바꾸어야 함
-    inters = load_user_cluster_interaction(config["data_path"])
+    inters = load_interaction()
     # 현재는 toy data
     items = inters["item"].unique()
     inters = inters[inters["user"] == inters["user"].unique()[0]]

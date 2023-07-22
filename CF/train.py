@@ -26,7 +26,7 @@ def main(args):
     seed_everything(config["seed"])
 
     logger.info("|| Load data")
-    inters = load_user_cluster_interaction(config["data_path"])
+    inters = load_interaction()
 
     dataset_params = config["dataset_params"]
     origin, train, test, num_users, num_items = preprocess_for_train(

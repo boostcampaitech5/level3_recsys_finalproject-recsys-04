@@ -1,0 +1,7 @@
+name: CBF
+
+entry_points:
+  main:
+    parameters:
+      config_name: {type: str, default: baseline}
+    command: "python run.py --config_name {config_name}"
