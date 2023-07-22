@@ -79,6 +79,28 @@ def get_trainer(config):
         )
 
 
+def get_precision(
+    actual_inters: pd.DataFrame, recommended_items: pd.DataFrame
+) -> int:
+    """
+    actual : 실제 유저의 interaction
+    recommended : 추천된 유저의 interaction 형식의 추천 아이템 result
+    """
+
+    precisions = []
+
+    for actual_items, recommended_items in zip(
+        actual_inters.groupby("user")["item"].unique(),
+        recommended_items.groupby("user")["item"].unique(),
+    ):
+        intersection = set(actual_items).intersection(set(recommended_items))
+        precision = len(intersection) / len(recommended_items)
+
+        precisions.append(precision)
+
+    return np.mean(precisions)
+
+
 def save_model(model, config, code_dir):
     # os.makedirs(f"./saved/{config['model']}", exist_ok=True)
     # with open(

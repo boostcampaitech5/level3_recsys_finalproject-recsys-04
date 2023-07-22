@@ -54,17 +54,20 @@ class Wrapper(mlflow.pyfunc.PythonModel):
         logger.info(f"|| Users : {users}")
 
         output, user_enc, item_enc = preprocess_for_inference(
-            inters.copy(), code_dir
+            inters.copy(), code_dir, feedback_type=config["feedback_type"]
         )
 
         dataset = get_dataset(config)
         dataset = dataset(data=output)
-        loader = DataLoader(
-            dataset,
-            batch_size=len(dataset),
-            shuffle=False,
-            num_workers=0,
-        )
+
+        loader = None
+        if config["dataset"] == "TorchDataset":
+            loader = DataLoader(
+                dataset,
+                batch_size=len(dataset),
+                shuffle=False,
+                num_workers=0,
+            )
 
         preds = self.model.predict(
             inters,
@@ -126,7 +129,8 @@ class BaseModel:
 
     @staticmethod
     def predict_for_user(user, group, pred, items, k):
-        watched = set(group["ci"])
+        # watched = set(group["ci"])    ### 본 것도 추천
+        watched = set()
         candidates = [item for item in items if item not in watched]
         pred = np.take(pred, candidates)
         pred = (pred - min(pred)) / (max(pred) - min(pred))
@@ -170,13 +174,13 @@ class AutoRec(nn.Module, BaseModel):
 
         self.encoder = nn.Sequential(
             nn.Linear(num_items, num_hidden),
-            # nn.Sigmoid(), # 성능이 좋지 않음
+            # nn.Sigmoid(),  # 성능이 좋지 않음
             nn.ReLU(),
             nn.Dropout(dropout),
         )
         self.decoder = nn.Sequential(
             nn.Linear(num_hidden, num_items),
-            # nn.Sigmoid(), # 성능이 좋지 않음
+            # nn.Sigmoid(),  # 성능이 좋지 않음
             nn.ReLU(),
         )
 

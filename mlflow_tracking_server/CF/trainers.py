@@ -93,13 +93,17 @@ class DeepLearningTrainer(BaseTrainer):
                 self.logger.info(f"|| [Epoch {epoch}] || RMSE: {rmse:.6f}")
 
             if rmse < best_rmse:
-                best_rmse, best_epoch = rmse, epoch
+                best_model, best_rmse, best_epoch = (
+                    self.model,
+                    rmse,
+                    epoch,
+                )
 
         self.logger.info(
             f"|| Best epoch: {epoch} || Best_rmse: {best_rmse:.6f} || Best_epoch: {best_epoch}"
         )
 
-        return self.model, best_rmse, best_epoch
+        return best_model, best_rmse, best_epoch
 
     def get_metrics(self) -> np.float32:
         super().ready_to_get_metrics()

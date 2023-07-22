@@ -15,8 +15,6 @@ import time
 
 import mlflow
 
-from models import Wrapper
-
 
 def main(args):
     now = datetime.now()
@@ -35,8 +33,18 @@ def main(args):
 
     dataset_params = config["dataset_params"]
     origin, train, test, num_users, num_items = preprocess_for_train(
-        inters.copy(), dataset_params, code_dir
+        inters.copy(),
+        dataset_params,
+        code_dir,
+        feedback_type=config["feedback_type"],
     )
+
+    sparsity = (
+        round((origin == 0).sum() / (origin.shape[0] * origin.shape[1]), 4)
+        * 100
+    )
+    logger.info(f"|| Sparsity : {sparsity}%")
+    mlflow.log_param("sparsity", sparsity)
 
     if "num_users" in config["model_params"].keys():
         config["model_params"]["num_users"] = num_users
@@ -54,7 +62,7 @@ def main(args):
 
     logger.info("|| Initialize dataset")
     dataset = get_dataset(config)
-    origin_dataset = dataset(data=origin)
+    # origin_dataset = dataset(data=origin)
     train_dataset = dataset(data=train)
     test_dataset = dataset(data=test)
 
@@ -101,13 +109,49 @@ def main(args):
         # )
 
     logger.info("|| Train model")
-    model, best_rmse, best_epoch = trainer.run()
+    best_model, best_rmse, best_epoch = trainer.run()
+
+    test_num = int(len(inters) * dataset_params["test_ratio"])
+    test_users = np.random.choice(inters["user"].unique(), test_num)
+
+    test_inters = inters[inters["user"].isin(test_users)].reset_index(drop=True)
+    test_users = test_inters["user"].unique()
+    test_items = test_inters["item"].unique()
+
+    final_test, user_enc, item_enc = preprocess_for_inference(
+        test_inters.copy(), code_dir, feedback_type=config["feedback_type"]
+    )
+
+    final_test_dataset = dataset(data=final_test)
+    final_test_loader = None
+
+    if config["dataset"] == "TorchDataset":
+        final_test_loader = DataLoader(
+            final_test_dataset,
+            batch_size=len(final_test_dataset),
+            shuffle=False,
+            num_workers=0,
+        )
+
+    recommended_items = best_model.predict(
+        test_inters,
+        user_enc,
+        item_enc,
+        test_users,
+        test_items,
+        config["topk"],
+        final_test_loader,
+    )
+
+    mean_precision = round(get_precision(test_inters, recommended_items), 4)
+    logger.info(f"|| precision@{config['topk']} : {mean_precision}")
 
     mlflow.log_metric("best_rmse", best_rmse)
     mlflow.log_metric("best_epoch", best_epoch)
+    mlflow.log_metric("mean_precision", mean_precision)
 
     logger.info("|| Save model")
-    save_model(model, config, code_dir)
+    save_model(best_model, config, code_dir)
 
     artifacts = {"model_path": f"{config['model']}_{config['config_name']}.pkl"}
 

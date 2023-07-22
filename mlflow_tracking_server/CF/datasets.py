@@ -77,7 +77,10 @@ def save_encoders(
 
 
 def preprocess_for_train(
-    data: pd.DataFrame, config: dict, code_dir: str
+    data: pd.DataFrame,
+    config: dict,
+    code_dir: str,
+    feedback_type: bool,
 ) -> Tuple[np.ndarray, np.ndarray, int, int]:
     r"""Helper function to preprocess data.
 
@@ -90,6 +93,7 @@ def preprocess_for_train(
     -------
     Tuple[np.ndarray, np.ndarray, int, int]
     """
+
     num_users = data["user"].nunique()
     num_items = data["item"].nunique()
 
@@ -100,8 +104,8 @@ def preprocess_for_train(
     data["user"] = user_enc.fit_transform(data["user"])
     data["item"] = item_enc.fit_transform(data["item"])
 
-    data["user"] -= 1
-    data["item"] -= 1
+    # data["user"] -= 1
+    # data["item"] -= 1
 
     train, test = train_test_split(data.values, test_size=config["test_ratio"])
     origin = data.values
@@ -121,6 +125,11 @@ def preprocess_for_train(
     test_mat /= 5
     origin_mat /= 5
 
+    if feedback_type == "implicit":
+        train_mat[np.where(train_mat > 0)] = 1
+        test_mat[np.where(test_mat > 0)] = 1
+        origin_mat[np.where(origin_mat > 0)] = 1
+
     save_encoders(user_enc, item_enc, num_users, num_items, f"{code_dir}")
     return origin_mat, train_mat, test_mat, num_users, num_items
 
@@ -128,6 +137,7 @@ def preprocess_for_train(
 def preprocess_for_inference(
     data: pd.DataFrame,
     code_dir: str,
+    feedback_type: bool,
 ) -> Tuple[np.ndarray, np.ndarray, int, int]:
     r"""Helper function to preprocess data.
 
@@ -154,10 +164,11 @@ def preprocess_for_inference(
 
     for user, item, rating in data:
         output[user, item] = rating
-    for user, item, rating in data:
-        output[user, item] = rating
 
     output /= 5
+
+    if feedback_type == "implicit":
+        output[np.where(output > 0)] = 1
 
     return output, user_enc, item_enc
 

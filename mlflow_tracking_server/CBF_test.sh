@@ -11,4 +11,6 @@ curl http://reconi-mlflow.kro.kr:30004/invocations \
 # cold-start 아닐 때
 # curl http://reconi-mlflow.kro.kr:30004/invocations \
 # -H 'Content-Type: application/json' \
-# --data '{[베트남로부스타블루드래곤워시드g1]}'
+# --data '{"input":[베트남로부스타블루드래곤워시드g1, 마일드블렌드]}'
+
+
