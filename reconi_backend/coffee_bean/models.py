@@ -9,10 +9,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 
-def thumbnail_directory_path(instance):
-    return "thumbnails/{0}.png".format(instance.title)
-
-
 ReconiUser = get_user_model()
 
 
@@ -40,7 +36,7 @@ class CoffeeBean(models.Model):
     description = models.TextField(blank=True, null=True)
     coupang_link = models.TextField(blank=True, null=True)
     thumbnail = models.ImageField(
-        upload_to=thumbnail_directory_path, null=True, blank=True
+        upload_to="thumbnails/", null=True, blank=True
     )
 
     def __str__(self):
