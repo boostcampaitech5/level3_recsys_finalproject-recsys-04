@@ -39,8 +39,12 @@ export default {
   gap: 20px;
   background-image: url('../assets/mainpage/main-sample.jpg');
   /* background-size : contain; */
-  background-size : 100% 100%;
+  /* background-size : 100% 100%; */
   /* background: var(--light-primary-origin, #3563e9); */
+  /* width: 100px; */
+  /* height: 100px; */
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 .Frame10 {
   display: flex;
