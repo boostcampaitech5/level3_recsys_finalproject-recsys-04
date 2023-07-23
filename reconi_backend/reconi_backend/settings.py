@@ -156,7 +156,7 @@ REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticatedOrReadOnly",  # or allow read-only access for unauthenticated users.
+        "rest_framework.permissions.AllowAny",  # or allow read-only access for unauthenticated users.
         # "rest_framework.permissions.IsAuthenticated",  # 인증된 사용자만 접근 가능
         # 'rest_framework.permissions.IsAdminUser', # 관리자만 접근 가능
     ),
