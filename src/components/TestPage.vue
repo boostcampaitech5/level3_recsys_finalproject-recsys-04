@@ -11,144 +11,70 @@
         </span>
       </div>
     </div>
-    <div class="Form-area"> 
-      <!-- 성별 -->
-      <b-form-group label="당신의 성별을 알려주세요" v-slot="{ ariaDescribedby }" class="mt-4">
-        <b-form-radio
-          v-model="selected"
-          :aria-describedby="ariaDescribedby"
-          name="gendoer-radios"
-          value="남자"
-          >남자</b-form-radio
-        >
-        <b-form-radio
-          v-model="selected"
-          :aria-describedby="ariaDescribedby"
-          name="gendoer-radios"
-          value="여자"
-          >여자</b-form-radio
-        >
-      </b-form-group>
-      <!-- 연령대 -->
-      <b-form-group label="당신의 연령대를 알려주세요" v-slot="{ ariaDescribedby }" class="mt-4">
-        <b-form-radio
-          v-model="ageRange"
-          :aria-describedby="ariaDescribedby"
-          name="age-radios"
-          value="10대"
-          >10대</b-form-radio
-        >
-        <b-form-radio
-          v-model="ageRange"
-          :aria-describedby="ariaDescribedby"
-          name="age-radios"
-          value="20대"
-          >20대</b-form-radio
-        >
-        <b-form-radio
-          v-model="ageRange"
-          :aria-describedby="ariaDescribedby"
-          name="age-radios"
-          value="30대"
-          >30대</b-form-radio
-        >
-        <b-form-radio
-          v-model="ageRange"
-          :aria-describedby="ariaDescribedby"
-          name="age-radios"
-          value="40대"
-          >40대</b-form-radio
-        >
-        <b-form-radio
-          v-model="ageRange"
-          :aria-describedby="ariaDescribedby"
-          name="age-radios"
-          value="50대"
-          >50대</b-form-radio
-        >
-        <b-form-radio
-          v-model="ageRange"
-          :aria-describedby="ariaDescribedby"
-          name="age-radios"
-          value="60대 이상"
-          >60대 이상</b-form-radio
-        >
-      </b-form-group>
-      <!-- 선호하는 향 -->
-      <b-form-group label="커피를 드실 때 선호하는 향을 선택해주세요" v-slot="{ ariaDescribedby }" class="mt-4">
-      <b-form-radio
-          v-model="flavor"
-          :aria-describedby="ariaDescribedby"
-          name="flvor-radios"
-          value="초콜릿향"
-          >초콜릿향</b-form-radio
-        >
-      <b-form-radio
-          v-model="flavor"
-          :aria-describedby="ariaDescribedby"
-          name="flvor-radios"
-          value="고소한 견과류향"
-          >고소한 견과류향</b-form-radio
-        >
-      <b-form-radio
-          v-model="flavor"
-          :aria-describedby="ariaDescribedby"
-          name="flvor-radios"
-          value="상큼한 과일향"
-          >상큼한 과일향</b-form-radio
-        >
-      <b-form-radio
-          v-model="flavor"
-          :aria-describedby="ariaDescribedby"
-          name="flvor-radios"
-          value="상큼한 과일향"
-          >상큼한 과일향</b-form-radio
-        >
-      </b-form-group>
-      <!-- 산미 -->
-      <div class="mt-4 ml-4 mr-4">
-        <label for="range-2">커피를 드실 때 선호하는 산미의 정도를 선택해주세요</label>
-        <b-form-input id="range-2" v-model="acid" type="range" min="0" max="10" step="1"></b-form-input>
-        <div class="mt-2">{{ acid }} / 10</div>
-      </div>
-      <!-- 단맛 -->
-      <div class="mt-4 ml-4 mr-4">
-        <label for="range-2">커피를 드실 때 선호하는 단맛의 정도를 선택해주세요</label>
-        <b-form-input id="range-2" v-model="sweet" type="range" min="0" max="10" step="1"></b-form-input>
-        <div class="mt-2">{{ sweet }} / 10</div>
-      </div>
-      <!-- 바디감 -->
-      <div class="mt-4 ml-4 mr-4">
-        <label for="range-2">커피를 드실 때 선호하는 바디감의 정도를 선택해주세요</label>
-        <b-form-input id="range-4" v-model="bodyRate" type="range" min="0" max="10" step="1"></b-form-input>
-        <div class="mt-2">{{ bodyRate }} / 10</div>
-      </div>
-      <!-- 로스팅 -->
-      <div class="mt-4 ml-4 mr-4">
-        <label for="range-2">커피를 드실 때 선호하는 단맛의 정도를 선택해주세요</label>
-        <b-form-input id="range-5" v-model="roast" type="range" min="0" max="10" step="1"></b-form-input>
-        <div class="mt-2">{{ roast }} / 10</div>
-      </div>
-      <b-button class="mt-4 mb-4" variant="outline-primary">Submit</b-button>
+    <Vueform :force-labels="true" :v-model="this.formData" endpoint="http://127.0.0.1:8000/api/v1/coffee-beans/recommended/" method="post">
+      <template #empty>
+        <FormSteps>
+          <FormStep
+            name="Step1"
+            label="Step1"
+            :elements="['gender', 'ageRange']"
+          />
+          <FormStep
+            name="Step2"
+            label="Step2"
+            :elements="['favorite_scent']"
+          />
+          <FormStep
+            name="Step3"
+            label="Step3"
+            :elements="['acidity', 'sweetness', 'body_feel', 'roasting_characteristics']"
+          />
+        </FormSteps>
 
-    </div>
+        <FormElements>
+          <RadiogroupElement name="gender" placeholder = "gender" view="blocks"
+          :items="[ { value:'M', label:'남자' }, { value:'F', label:'여자' }  ]"
+          label="당신의 성별을 알려주세요"/>
+
+          <RadiogroupElement name="age" placeholder = "age" view="blocks"
+          :items="[ { value:'10대', label:'10대' }, { value:'20대', label:'20대' }, { value:'30대', label:'30대' }, { value:'40대', label:'40대' }, { value:'50대', label:'50대' }, { value:'60대 이상', label:'60대 이상' }]"
+          label="당신의 연령대를 알려주세요"/>
+          <RadiogroupElement name="favorite_scent" placeholder = "favorite_scent" view="blocks"
+          :items="[ { value:'chocolate', label:'초콜릿향' }, { value:'nutty', label:'고소한 견과류향' }, { value:'fruity', label:'상큼한 과일향' }, { value:'floral', label:'은은한 꽃향' }]"
+          label="커피를 드실 때 선호하는 향을 알려주세요"/>
+          <SliderElement name="acidity" placeholder = "acidity" :defalut="5" :max="10" :min="0" :step="1"
+          label="커피를 드실 때 선호하는 산미의 정도를 알려주세요"
+          info="산미는 원두가 가지고 있는 신 맛의 정도를 나타냅니다." show-tooltip="focus" tooltip-position="bottom"/>
+          <SliderElement name="sweetness" placeholder = "sweetness" :defalut="5" :max="10" :min="0" :step="1"
+          label="커피를 드실 때 선호하는 단 맛의 정도를 알려주세요"
+          info="단 맛은 원두가 가지고 있는 단 맛의 정도를 나타냅니다." show-tooltip="focus" tooltip-position="bottom"/>
+          <SliderElement name="body_feel" placeholder = "body_feel" :defalut="5" :max="10" :min="0" :step="1"
+          label="커피를 드실 때 선호하는 바디감의 정도를 알려주세요"
+          info="바디감은 커피가 입 안으로 들어왔을 때 주는 무게감을 나타냅니다." show-tooltip="focus" tooltip-position="bottom"/>
+          <SliderElement name="roasting_characteristics" placeholder = "roasting_characteristics" :defalut="5" :max="10" :min="0" :step="1"
+          label="커피를 드실 때 선호하는 원두 로스팅의 정도를 알려주세요"
+          info="로스팅은 원두를 가열하여 볶은 정도를 의미합니다." show-tooltip="focus" tooltip-position="bottom"/>
+        </FormElements>
+        <FormStepsControls />
+      </template>
+    </Vueform>
   </div>
-  <TestResult></TestResult>
+  <TestResult v-if="this.test_done"></TestResult>
 </template>
 
 <script>
 import TestResult from "./TestResult.vue";
 export default {
-  data(){
-    return{
-      gender : '',
-      ageRange : '',
-      flavor : '',
-      acid : 0,
-      sweet : 0,
-      bodyRate : 0,
-      roast : 0,
-    }
+  data() {
+    return {
+      test_done: false,
+      formData : {},
+    };
+  },
+  methods:{
+    handleSubmit(){
+      console.log(this.formData)
+    },
   },
   components: {
     TestResult,
@@ -203,7 +129,7 @@ export default {
   letter-spacing: 0.2px;
 }
 
-.Form-area{
+.Form-area {
   background-color: #f7f7f7;
   border-radius: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -238,5 +164,4 @@ b-form-input[type="range"]::-webkit-slider-thumb {
 b-button {
   width: 100%;
 }
-
 </style>
