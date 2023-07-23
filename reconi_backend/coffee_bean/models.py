@@ -38,6 +38,7 @@ class CoffeeBean(models.Model):
     thumbnail = models.ImageField(
         upload_to="thumbnails/", null=True, blank=True
     )
+    purchase = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return str(self.title)
