@@ -286,4 +286,5 @@ pyrightconfig.json
 .python-version
 poetry.lock
 
+*.csv
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,python,django

@@ -24,6 +24,9 @@ django-cors-headers = "^4.2.0"
 requests = "^2.31.0"
 
 
+[tool.poetry.group.dev.dependencies]
+pandas = "^2.0.3"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
