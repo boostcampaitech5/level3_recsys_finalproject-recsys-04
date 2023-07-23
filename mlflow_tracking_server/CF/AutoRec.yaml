@@ -1,6 +1,5 @@
 baseline:
   config_name: baseline
-  data_path: /opt/ml/Recommendation-Modeling/data/not_one_entity_inters.csv
   feedback_type: explicit
   dataset: TorchDataset
   dataset_params:
