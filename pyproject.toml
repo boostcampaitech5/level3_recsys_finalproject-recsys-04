@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "reconi_backend"}]
 
 [tool.poetry.dependencies]
-python = "3.9.16"
+python = "3.9.17"
 django = "^4.2.3"
 psycopg2-binary = "^2.9.6"
 pillow = "^10.0.0"
@@ -26,6 +26,11 @@ requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 pandas = "^2.0.3"
+
+
+[tool.poetry.group.deploy.dependencies]
+gunicorn = "^21.2.0"
+whitenoise = "^6.5.0"
 
 [build-system]
 requires = ["poetry-core"]
