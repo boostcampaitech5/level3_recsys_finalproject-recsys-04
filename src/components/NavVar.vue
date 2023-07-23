@@ -7,7 +7,8 @@
         <b-navbar-nav class="ml-auto">
           <b-nav-item class="mr-3" router-link to="/">Home</b-nav-item>
           <b-nav-item class="mr-3" router-link to="/products">Products</b-nav-item>
-          <b-nav-item href="#">About Us</b-nav-item>
+          <b-nav-item v-if="!$store.getters.isLogin" href="#" @click="$emit('openLoginModal')">Login</b-nav-item>
+          <b-nav-item v-else @click="onLogOut">Logout</b-nav-item>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
@@ -20,6 +21,17 @@ export default {
   data() {
     return {};
   },
+  methods:{
+    onLogOut(){
+      // alert(`${!this.$store.state.token}`)
+      // event.preventDefault();
+      this.$store.dispatch("LOGOUT");   // logout action
+    }
+  },
+  mounted(){
+    console.log('현재 상태')
+    console.log(this.$store.getters.isLogin)
+  }
 
 };
 </script>
