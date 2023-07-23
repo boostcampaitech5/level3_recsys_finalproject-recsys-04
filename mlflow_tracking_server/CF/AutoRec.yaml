@@ -18,6 +18,6 @@ baseline:
     lr: 0.0005
     weight_decay: 0.0001
     device: cuda
-  topk: 5
+  topk: 4
   seed: 0
     

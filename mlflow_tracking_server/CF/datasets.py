@@ -76,6 +76,16 @@ def load_interaction() -> pd.DataFrame:
     inters = filtered_data[["user_nickname", "bean_id_id", "rating"]]
     inters.columns = ["user", "item", "rating"]
 
+    more_than_one_inter_users = (
+        inters.groupby("user")["item"]
+        .nunique()
+        .loc[lambda x: x > 1]
+        .index.tolist()
+    )
+    inters = inters[inters["user"].isin(more_than_one_inter_users)].reset_index(
+        drop=True
+    )
+
     # inters.to_csv("test_more_inter.csv", index=False)
 
     return inters

@@ -15,6 +15,8 @@ import time
 
 import mlflow
 
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 def main(args):
     now = datetime.now()
@@ -153,7 +155,10 @@ def main(args):
     logger.info("|| Save model")
     save_model(best_model, config, code_dir)
 
-    artifacts = {"model_path": f"{config['model']}_{config['config_name']}.pkl"}
+    artifacts = {
+        "model_path": f"{config['model']}_{config['config_name']}.pkl",
+        "cosine_sim_path": "item-item_cosine_sim.pkl",
+    }
 
     mlflow.pyfunc.log_model(
         artifact_path=config["model"],
@@ -165,7 +170,7 @@ def main(args):
             "./trainers.py",
             "./utils.py",
         ],
-        python_model=Wrapper(code_dir, config, items),
+        python_model=Wrapper(code_dir, config, items, inters),
         # registered_model_name=None,
         artifacts=artifacts,
     )

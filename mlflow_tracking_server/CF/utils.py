@@ -131,6 +131,13 @@ def load_model(path):
     return model
 
 
+def load_cosine_sim(path):
+    with open(path, "rb") as file:
+        cosine_sim = pickle.load(file)
+
+    return cosine_sim
+
+
 def init_logger():
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)

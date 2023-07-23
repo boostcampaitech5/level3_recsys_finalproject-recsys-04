@@ -17,16 +17,22 @@ from datasets import *
 
 import mlflow
 
+import warnings
+
+warnings.filterwarnings("ignore")
+
 
 class Wrapper(mlflow.pyfunc.PythonModel):
-    def __init__(self, code_dir, config, items):
+    def __init__(self, code_dir, config, items, inters):
         super(Wrapper, self).__init__()
         self.code_dir = code_dir
         self.config = config
         self.items = items
+        self.inters = inters
 
     def load_context(self, context):
         self.model = load_model(context.artifacts["model_path"])
+        self.cosine_sim = load_cosine_sim(context.artifacts["cosine_sim_path"])
 
     def predict(self, context, model_input):
         logger = init_logger()
@@ -44,18 +50,54 @@ class Wrapper(mlflow.pyfunc.PythonModel):
         code_dir = self.code_dir
         config = self.config
         items = self.items
+        origin_inters = self.inters
 
-        # logger.info(f"|| Items : {items}")
+        new_inters = model_input
+        new_users = new_inters["user"].unique()
 
-        inters = model_input
-        # logger.info(f"|| Input : \n{inters}")
+        logger.info(f"|| Access users : {new_users}")
 
-        users = inters["user"].unique()
-        logger.info(f"|| Users : {users}")
+        ksks_ids = [i for i in range(0, 42)]  # 콩스콩스 아이템 id
+        ksks_matched_items = dict(self.cosine_sim.loc[ksks_ids, :].idxmax())
 
-        output, user_enc, item_enc = preprocess_for_inference(
-            inters.copy(), code_dir, feedback_type=config["feedback_type"]
+        # CBF (any item -> ksks item)
+        new_inters.loc[:, "item"] = new_inters["item"].apply(
+            lambda x: ksks_matched_items[x]
         )
+
+        # CF
+        if config["model"] == "EASE":
+            inters = pd.concat([origin_inters, new_inters]).reset_index(
+                drop=True
+            )
+        else:
+            inters = new_inters
+
+        inters_copy = inters.copy()
+
+        items = inters_copy["item"].unique()
+
+        num_users = inters_copy["user"].nunique()
+        num_items = len(ksks_ids)
+        # num_items = inters_copy["item"].nunique()
+
+        user_enc = LabelEncoder()
+        item_enc = LabelEncoder()
+
+        # Every user and item would be used as index
+        inters_copy["user"] = user_enc.fit_transform(inters_copy["user"])
+        inters_copy["item"] = item_enc.fit_transform(inters_copy["item"])
+
+        data = inters_copy.values
+        output = np.zeros((num_users, num_items))
+
+        for user, item, rating in data:
+            output[user, item] = rating
+
+        output /= 5
+
+        if config["feedback_type"] == "implicit":
+            output[np.where(output > 0)] = 1
 
         dataset = get_dataset(config)
         dataset = dataset(data=output)
@@ -69,17 +111,42 @@ class Wrapper(mlflow.pyfunc.PythonModel):
                 num_workers=0,
             )
 
+        if config["model"] == "EASE":
+            self.model.fit(dataset.data)
+
         preds = self.model.predict(
             inters,
             user_enc,
             item_enc,
-            users,
+            new_users,
             items,
             config["topk"],
             loader=loader,
+        ).reset_index(drop=True)
+
+        # CBF (ksks item -> any item)
+        ksks_rec_items = preds["item"].tolist()
+
+        any_rec_items = (
+            self.cosine_sim.loc[
+                list(set(self.cosine_sim.index) - set(ksks_ids)), ksks_rec_items
+            ]
+            .idxmax()
+            .values
         )
 
-        return preds
+        preds["score"] = any_rec_items
+        preds.columns = ["user", "ksks_item", "any_item"]
+
+        result = {}
+        for user, group_values in preds.groupby("user"):
+            result[f"{user}"] = (
+                group_values[["ksks_item", "any_item"]]
+                .values.flatten()
+                .tolist()
+            )
+
+        return result
 
 
 class BaseModel:
@@ -121,6 +188,7 @@ class BaseModel:
                     for user, group in g
                 ],
             )
+
         df = pd.concat(user_preds)
         df["item"] = item_enc.inverse_transform(df["item"])
         df["user"] = user_enc.inverse_transform(df["user"])
@@ -129,7 +197,7 @@ class BaseModel:
 
     @staticmethod
     def predict_for_user(user, group, pred, items, k):
-        # watched = set(group["ci"])    ### 본 것도 추천
+        # watched = set(group["ci"])  ### 본 것도 추천 하려면 이 부분 주석!
         watched = set()
         candidates = [item for item in items if item not in watched]
         pred = np.take(pred, candidates)

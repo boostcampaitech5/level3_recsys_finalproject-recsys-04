@@ -54,7 +54,7 @@ class Wrapper(mlflow.pyfunc.PythonModel):
 class CosineSimilarityRec:
     def __init__(self, config):
         self.topk = config["topk"]
-        self.mean_cosine_sim = None
+        # self.mean_cosine_sim = None
 
     # -- cold start (recommend for target user)
     def recommend_for_target_user(self):
@@ -80,7 +80,7 @@ class CosineSimilarityRec:
             .flatten()[1 : k + 1]  # top k
         )
         recom_item_ids = item_profile.iloc[recom_idx, :]["id"].values
-        self.mean_cosine_sim = cosine_sim_df.loc[recom_idx, 0].values.mean()
+        # self.mean_cosine_sim = cosine_sim_df.loc[recom_idx, 0].values.mean()
 
         return recom_item_ids
 
@@ -103,7 +103,7 @@ class CosineSimilarityRec:
         recom_idx = cosine_sim_df.idxmax().tolist()
 
         recom_item_ids = item_profile.iloc[recom_idx, :]["id"].values
-        self.mean_cosine_sim = cosine_sim_df.loc[recom_idx].values.mean()
+        # self.mean_cosine_sim = cosine_sim_df.loc[recom_idx].values.mean()
 
         return recom_item_ids
 
@@ -126,4 +126,5 @@ class CosineSimilarityRec:
         return cosine_sim_df
 
     def get_recom_result(self):
-        return self.topk, self.mean_cosine_sim
+        # return self.topk, self.mean_cosine_sim
+        return self.topk

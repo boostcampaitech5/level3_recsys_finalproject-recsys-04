@@ -10,5 +10,5 @@ baseline:
   trainer: ClosedFormTrainer
   trainer_params:
     device: cpu
-  topk: 5
+  topk: 4
   seed: 0
