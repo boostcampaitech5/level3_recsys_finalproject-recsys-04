@@ -60,6 +60,7 @@ def add_recommendations_from_predictions(model, predictions, user):
     # '주어진 추천 결과 저장' 테이블에 유저와 커피 원두 아이템을 추가
     rec_coffee, _ = model.objects.get_or_create(user=user)
 
+    rec_coffee.coffee_beans.clear()
     for coffee_pk in predictions:
         coffee_item = get_object_or_404(CoffeeBean, pk=coffee_pk)
         rec_coffee.coffee_beans.add(coffee_item)
@@ -214,6 +215,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         }
 
         ##### Inference Server에 POST 요청을 보냅니다.
+
         try:
             response = requests.post(
                 inference_server_url, json=payload, timeout=TIMEOUT_SECONDS
@@ -228,6 +230,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
         except requests.exceptions.RequestException:
             # 요청이 실패한 경우 에러 메시지를 DRF의 응답으로 반환합니다.
+            # print(response)
             return Response(
                 {"error": "Failed to send inference request."}, status=500
             )
@@ -308,6 +311,26 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
         serializer = CoffeeBeanSerializer(coffee_beans, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def user_cart_ids(self, request):
+        user = request.user
+
+        response = {}
+
+        #### 담기 리스트
+        try:
+            coffeeincart = CoffeeInCart.objects.get(user=user)
+            # 추천된 커피 원두 데이터를 Top 3개만 가져옵니다.
+            coffeeincart_coffee_item_ids = (
+                coffeeincart.coffee_beans.values_list("id", flat=True)
+            )
+            # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
+            response["user_item_ids"] = list(coffeeincart_coffee_item_ids)
+        except CoffeeInCart.DoesNotExist:
+            response["user_item_ids"] = []
+
+        return Response(response)
 
     @action(detail=False, methods=["get"])
     def mypage(self, request):
