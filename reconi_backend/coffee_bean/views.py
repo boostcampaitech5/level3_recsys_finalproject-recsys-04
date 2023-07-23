@@ -255,13 +255,14 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
         #### JSON 데이터에서 필요한 정보 추출
         #### Inference Server에 전달할 데이터 형식에 맞게 Payload를 가공합니다.
-        payload = {"Inputs": {}}
+        payload = {"dataframe_records": []}
 
         # 가져온 데이터를 딕셔너리로 구성합니다.
         for user_id, coffee_id in cart_data:
-            if user_id not in payload["Inputs"]:
-                payload["Inputs"][user_id] = []
-            payload["Inputs"][user_id].append(coffee_id)
+            if user_id not in payload["dataframe_records"]:
+                payload["dataframe_records"].append(
+                    {"user_id": user_id, "item": coffee_id}
+                )
 
         ##### Inference Server에 POST 요청을 보냅니다.
         try:
