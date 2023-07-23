@@ -309,6 +309,82 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         serializer = CoffeeBeanSerializer(coffee_beans, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=["get"])
+    def mypage(self, request):
+        user = request.user
+
+        #### 담기 리스트
+        try:
+            coffeeincart = CoffeeInCart.objects.get(user=user)
+            # 추천된 커피 원두 데이터를 Top 3개만 가져옵니다.
+            coffeeincart_coffee_item_ids = (
+                coffeeincart.coffee_beans.values_list("id", flat=True)
+            )
+
+            # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
+            coffeeincart_coffee = CoffeeBean.objects.filter(
+                id__in=coffeeincart_coffee_item_ids
+            )
+
+            cart = CoffeeBeanSerializer(coffeeincart_coffee, many=True).data
+
+        except CoffeeInCart.DoesNotExist:
+            cart = None
+
+        #### Cold Start 추천 리스트
+        try:
+            recommendedcoffeecoldstart = RecommendedCoffeeColdStart.objects.get(
+                user=user
+            )
+            # 추천된 커피 원두 데이터를 Top 3개만 가져옵니다.
+            recommendedcoffeecoldstart_coffee_item_ids = (
+                recommendedcoffeecoldstart.coffee_beans.values_list(
+                    "id", flat=True
+                )
+            )
+
+            # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
+            recommendedcoffeecoldstart_coffee = CoffeeBean.objects.filter(
+                id__in=recommendedcoffeecoldstart_coffee_item_ids
+            )
+
+            cold_start = CoffeeBeanSerializer(
+                recommendedcoffeecoldstart_coffee, many=True
+            ).data
+
+        except RecommendedCoffeeColdStart.DoesNotExist:
+            cold_start = None
+
+        #### Not Cold Start 추천 리스트
+        try:
+            recommendedcoffeenotcoldstart = (
+                RecommendedCoffeeNotColdStart.objects.get(user=user)
+            )
+            # 추천된 커피 원두 데이터를 Top 3개만 가져옵니다.
+            recommendedcoffeenotcoldstart_coffee_item_ids = (
+                recommendedcoffeenotcoldstart.coffee_beans.values_list(
+                    "id", flat=True
+                )
+            )
+            # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
+            recommendedcoffeenotcoldstart_coffee = CoffeeBean.objects.filter(
+                id__in=recommendedcoffeenotcoldstart_coffee_item_ids
+            )
+
+            not_cold_start = CoffeeBeanSerializer(
+                recommendedcoffeenotcoldstart_coffee, many=True
+            ).data
+        except RecommendedCoffeeNotColdStart.DoesNotExist:
+            not_cold_start = None
+
+        # key vale 형식으로 데이터를 반환합니다.
+        unique_categories = {
+            "cart": cart,
+            "not_cold_start": not_cold_start,
+            "cold_start": cold_start,
+        }
+        return Response(unique_categories)
+
 
 class CoffeeBeanOriginsViewSet(viewsets.ModelViewSet):
     queryset = CoffeeBeanOrigins.objects.all()
