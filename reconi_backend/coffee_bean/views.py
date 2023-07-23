@@ -264,9 +264,8 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         for user_id, coffee_id in cart_data:
             if user_id not in payload["dataframe_records"]:
                 payload["dataframe_records"].append(
-                    {"user_id": user_id, "item": coffee_id}
+                    {"user": str(user_id), "item": coffee_id, "rating": 1}
                 )
-
         ##### Inference Server에 POST 요청을 보냅니다.
         try:
             response = requests.post(
