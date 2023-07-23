@@ -52,7 +52,10 @@ def feature_engineering(
         review_features, how="left", left_on="id", right_on="bean_id_id"
     )
 
-    # -- item description으로부터 키워드 관련 피쳐 생성
+    # -- item description으로부터 키워드 추출 - 키워드 피쳐 생성
+    items = extract_keywords(items)
+
+    # -- 추출한 키워드 피쳐로부터 자카드 유사도를 계산한 피쳐 생성
     if not os.path.exists(
         "/opt/ml/Recommendation-Modeling/mlflow_tracking_server/CBF/item-item_cosine_sim.pkl"
     ):
@@ -88,22 +91,20 @@ def make_keyword_feature(
     pd.DataFrame : 키워드 관련 피쳐가 추가된 아이템 데이터셋
     """
 
-    # 키워드 추출 - 키워드 피쳐 생성
-    items = extract_keywords(items)
-
     # 타겟 아이템과 이외 아이템들의 키워드 간 자카드 유사도를 계산해 피쳐 생성
     target = items[items["id"] == target_item_id]  # 타겟 아이템 지정
 
     # 타겟 아이템에 대한 키워드 자카드 유사도 계산
+    new_items = items.copy()
     col_name = f"{target_item_id}_keyword_jaccard_sim"
-    items[col_name] = items.apply(
+    new_items[col_name] = items.apply(
         lambda row: jaccard_similarity(
             target["keywords_set"].values[0], row["keywords_set"]
         ),
         axis=1,
     )
 
-    return items
+    return new_items
 
 
 def nouns_extractor(text: str, kiwi) -> str:
