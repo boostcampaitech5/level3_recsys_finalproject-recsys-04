@@ -52,13 +52,13 @@ def feature_engineering(
         review_features, how="left", left_on="id", right_on="bean_id_id"
     )
 
-    # -- item description으로부터 키워드 추출 - 키워드 피쳐 생성
-    items = extract_keywords(items)
-
     # -- 추출한 키워드 피쳐로부터 자카드 유사도를 계산한 피쳐 생성
     if not os.path.exists(
         "/opt/ml/Recommendation-Modeling/mlflow_tracking_server/CBF/item-item_cosine_sim.pkl"
     ):
+        # -- item description으로부터 키워드 추출 - 키워드 피쳐 생성
+        items = extract_keywords(items)
+
         if target_item_ids:  # 타겟이 아이템인 경우 - 즉 콜드 스타트가 아닌 경우
             for target_item_id in target_item_ids:
                 items = make_keyword_feature(items, target_item_id)

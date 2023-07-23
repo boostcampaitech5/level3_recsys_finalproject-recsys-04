@@ -123,6 +123,9 @@ class CosineSimilarityRec:
         with open("item-item_cosine_sim.pkl", "wb") as file:
             pickle.dump(cosine_sim_df, file)
 
+        with open("../CF/item-item_cosine_sim.pkl", "wb") as file:
+            pickle.dump(cosine_sim_df, file)
+
         return cosine_sim_df
 
     def get_recom_result(self):
