@@ -1,8 +1,7 @@
 <template>
   <Vueform
     v-model="this.form"
-    endpoint="http://127.0.0.1:8000/user/registration/"
-    method="post"
+    :endpoint="false"
   >
     <GroupElement name="personal_information" label="Your information">
       <TextElement
@@ -80,54 +79,64 @@ export default {
   methods: {
     checkNickName() {
       axios
-        .post("http://127.0.0.1:8000/user/registration/nickname-check/", {
-          nickname: this.form.nickname,
-        })
+        .post(
+          "http://reconi-backend.kro.kr:30005/user/registration/nickname-check/",
+          {
+            nickname: this.form.nickname,
+          }
+        )
         .then((getted) => {
           alert(getted.data.detail);
           this.nickname_validation = true;
         })
         .catch(() => {
           // alert(getted.response.data.detail);
-          alert('해당 닉네임은 사용할 수 없습니다.');
-          this.nickname_validation = false;
+          alert("해당 닉네임은 사용할 수 없습니다.");
+          // this.nickname_validation = false;
           this.form.nickname = "";
         });
     },
     checkEmail() {
       axios
-        .post("http://127.0.0.1:8000/user/registration/email-check/", {
-          email: this.form.email,
-        })
+        .post(
+          "http://reconi-backend.kro.kr:30005/user/registration/email-check/",
+          {
+            email: this.form.email,
+          }
+        )
         .then((getted) => {
           alert(getted.data.detail);
           this.email_validation = true;
         })
         .catch(() => {
-          alert('해당 이메일은 사용할 수 없습니다.');
+          alert("해당 이메일은 사용할 수 없습니다.");
           // alert(getted.response.data.detail);
-          this.email_validation = false;
+          // this.email_validation = false;
           this.form.email = "";
         });
     },
     onSend() {
-      if (!this.validation) {
+      if (!this.nickname_validation) {
         alert("닉네임 중복확인을 해주세요!");
         return false;
-      } else if (!this.email_validation) {
+      }
+      if (!this.email_validation) {
         alert("이메일 중복확인을 해주세요!");
         return false;
-      } else {
-        axios
-          .post("http://127.0.0.1:8000/user/registration/", this.form)
-          .then(() => {
-            location.reload();
-          })
-          .catch((getted) => {
-            alert(getted.response.data.detail);
-          });
-          return true;
       }
+      axios
+        .post(
+          "http://reconi-backend.kro.kr:30005/user/registration/",
+          this.form
+        )
+        .then(() => {
+          location.reload();
+        })
+        .catch((getted) => {
+          console.log(getted)
+          alert('중복 검사를 진행해주세요.');
+        });
+      return true;
     },
   },
 };

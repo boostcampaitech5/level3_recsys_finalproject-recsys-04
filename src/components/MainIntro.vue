@@ -14,7 +14,7 @@
       </div>
       <div class="Frame12">
         <b-button pill variant="danger" class="Frame12-button"
-          router-link to="/test"
+          @click="loginCheck"
           >테스트 하기</b-button
         >
       </div>
@@ -25,6 +25,16 @@
 <script>
 export default {
   name: "main-intro",
+  methods:{
+    loginCheck(){
+      if (!this.$store.getters.isLogin){
+        alert('로그인을 먼저 진행해주세요!')
+      } else{
+        this.$router.push('/test')
+      }
+      
+    }
+  }
 };
 </script>
 

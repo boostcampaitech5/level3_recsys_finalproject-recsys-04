@@ -4,10 +4,9 @@
       <div class="Frame17">
         <div class="Frame16">
           <span class="Frame16-title">
-            내 커피 인생은 <br />
-            듀콩을 만나기 전과 후로 나뉜다.
+            "To be or not to bean, <br> that is the coffee." 
           </span>
-          <span class="Frame16-sub"> 영화 "봄날에 커피를 마시며"</span>
+          <span class="Frame16-sub"> 윌리엄 셰익스피어</span>
         </div>
         <div class="Frame16-2">
           <div class="Frame60">

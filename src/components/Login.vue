@@ -1,6 +1,6 @@
 <template>
   <div class="w-full bg-white">
-    <b-modal v-model="this.modalShow" size="lg" hide-footer title="JOIN COFFLE">
+    <b-modal v-model="this.modalShow" size="lg" hide-footer title="JOIN Coffee Playlist">
       <JoinComponent 
       @closeModal="this.modalShow=!this.modalShow"/>
     </b-modal>
@@ -72,6 +72,7 @@ export default {
       event.preventDefault();
       // alert(JSON.stringify(this.form));
       this.$store.dispatch("LOGIN", this.form); // login action
+      // this.$store.dispatch("GETCART");
     },
     onReset(event) {
       event.preventDefault();

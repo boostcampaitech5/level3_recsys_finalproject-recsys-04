@@ -74,7 +74,7 @@ export default {
     function getSampleProducts() {
       axios
         .get(
-          "http://127.0.0.1:8000/api/v1/coffee-beans/random_items/?page=0&page_size=0"
+          "http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/random_items/?page=0&page_size=0"
         )
         .then((getted) => {
           sampleProducts.value = getted.data;

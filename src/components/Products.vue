@@ -190,7 +190,7 @@ export default {
 
     function getOrigins() {
       axios
-        .get("http://127.0.0.1:8000/api/v1/coffee-beans/unique_categories/")
+        .get("http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/unique_categories/")
         .then((getted) => {
           origins.value = getted.data.origin;
           roasteries.value = getted.data.roastery;
@@ -202,7 +202,7 @@ export default {
 
     function getinitpage() {
       axios
-        .get("http://127.0.0.1:8000/api/v1/coffee-beans/?page=1&page_size=30")
+        .get("http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/?page=1&page_size=30")
         .then((getted) => {
           console.log(getted);
           prev.value = getted.data.previous;
