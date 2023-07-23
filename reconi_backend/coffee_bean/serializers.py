@@ -5,6 +5,8 @@ from .models import (
     CoffeeBeanReview,
     CoffeeBeanOrigins,
     CoffeeInCart,
+    RecommendedCoffeeColdStart,
+    RecommendedCoffeeNotColdStart,
 )
 
 
@@ -43,4 +45,12 @@ class CoffeeInCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CoffeeInCart
+        fields = "__all__"
+
+
+class RecommendedCoffeeNotColdStartSerializer(serializers.ModelSerializer):
+    coffee_beans = CoffeeBeanSerializer(many=True)
+
+    class Meta:
+        model = RecommendedCoffeeNotColdStart
         fields = "__all__"

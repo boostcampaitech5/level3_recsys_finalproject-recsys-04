@@ -14,6 +14,7 @@ from user.serializers import ReconiUserSerializer
 
 from django.db.models import Q
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 # Import Models
 from .models import (
@@ -23,6 +24,7 @@ from .models import (
     CoffeeBeanReview,
     CoffeeInCart,
     RecommendedCoffeeColdStart,
+    RecommendedCoffeeNotColdStart,
 )
 
 # Import Serializers
@@ -32,10 +34,11 @@ from .serializers import (
     CoffeeBeanOriginsSerializer,
     CoffeeBeanReviewSerializer,
     CoffeeInCartSerializer,
+    RecommendedCoffeeNotColdStartSerializer,
 )
 from django.contrib.auth import get_user_model
 
-
+TIMEOUT_SECONDS = 10
 ReconiUser = get_user_model()
 
 
@@ -53,9 +56,9 @@ class CoffeeBeanOriginViewSet(viewsets.ModelViewSet):
     serializer_class = CoffeeBeanOriginSerializer
 
 
-def add_recommendations_from_predictions(predictions, user):
-    # 'RecommendationsCoffeeColdStart' 모델에 유저와 커피 원두 아이템을 추가
-    rec_coffee, _ = RecommendedCoffeeColdStart.objects.get_or_create(user=user)
+def add_recommendations_from_predictions(model, predictions, user):
+    # '주어진 추천 결과 저장' 테이블에 유저와 커피 원두 아이템을 추가
+    rec_coffee, _ = model.objects.get_or_create(user=user)
 
     for coffee_pk in predictions:
         coffee_item = get_object_or_404(CoffeeBean, pk=coffee_pk)
@@ -182,7 +185,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["post"])
-    def recommended(self, request):
+    def cold_start_recommended(self, request):
         user = request.user
         data = request.data
         inference_server_url = getattr(settings, "INFERENCE_COLDSTART", "")
@@ -212,12 +215,16 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
         ##### Inference Server에 POST 요청을 보냅니다.
         try:
-            response = requests.post(inference_server_url, json=payload)
+            response = requests.post(
+                inference_server_url, json=payload, timeout=TIMEOUT_SECONDS
+            )
             predictions = response.json()["predictions"]
             # {"predictions" : [1,2,3]}
 
             # Inference 결과 DB 인덱싱
-            add_recommendations_from_predictions(predictions, user)
+            add_recommendations_from_predictions(
+                RecommendedCoffeeColdStart, predictions, user
+            )
 
         except requests.exceptions.RequestException:
             # 요청이 실패한 경우 에러 메시지를 DRF의 응답으로 반환합니다.
@@ -226,11 +233,79 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
             )
 
         # 추천된 커피 원두 데이터를 Top 3개만 가져옵니다.
-        recommended_coffee_items = RecommendedCoffeeColdStart.objects.get(
+        recommended_coffee_item_ids = RecommendedCoffeeColdStart.objects.get(
             user=user
-        )["coffee_beans"][:3]
+        ).coffee_beans.values_list("id", flat=True)
+
         # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
-        serializer = CoffeeBeanSerializer(recommended_coffee_items, many=True)
+        coffee_beans = CoffeeBean.objects.filter(
+            id__in=recommended_coffee_item_ids
+        )
+
+        serializer = CoffeeBeanSerializer(coffee_beans, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["post"])
+    def not_cold_start_inferenced(self, request):
+        inference_server_url = getattr(settings, "INFERENCE_NOTCOLDSTART", "")
+
+        cart_data = CoffeeInCart.objects.all().values_list(
+            "user_id", "coffee_beans__id"
+        )
+
+        #### JSON 데이터에서 필요한 정보 추출
+        #### Inference Server에 전달할 데이터 형식에 맞게 Payload를 가공합니다.
+        payload = {"Inputs": {}}
+
+        # 가져온 데이터를 딕셔너리로 구성합니다.
+        for user_id, coffee_id in cart_data:
+            if user_id not in payload["Inputs"]:
+                payload["Inputs"][user_id] = []
+            payload["Inputs"][user_id].append(coffee_id)
+
+        ##### Inference Server에 POST 요청을 보냅니다.
+        try:
+            response = requests.post(
+                inference_server_url, json=payload, timeout=TIMEOUT_SECONDS
+            )
+            predictions = response.json()["predictions"]
+            # {"predictions" : [1,2,3]}
+
+            # Inference 결과 DB 인덱싱
+            # bulk를 통한 일괄 데이터 업데이트가 필요해보임 -> 응답시간을 줄이기 위해서
+            for user, prediction in predictions.items():
+                add_recommendations_from_predictions(
+                    RecommendedCoffeeNotColdStart, prediction, user
+                )
+
+        except requests.exceptions.RequestException:
+            # 요청이 실패한 경우 에러 메시지를 DRF의 응답으로 반환합니다.
+            return Response(
+                {"error": "Failed to send inference request."}, status=500
+            )
+        return Response(status=200)
+
+    @action(detail=False, methods=["get"])
+    def not_cold_start_recommended(self, request):
+        user = request.user
+
+        try:
+            instance = RecommendedCoffeeNotColdStart.objects.get(user=user)
+
+        except RecommendedCoffeeNotColdStart.DoesNotExist:
+            return Response({"error": "User's Cart is Not Exist"}, status=404)
+
+        # 추천된 커피 원두 데이터를 Top 3개만 가져옵니다.
+        recommended_coffee_item_ids = instance.coffee_beans.values_list(
+            "id", flat=True
+        )
+
+        # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
+        coffee_beans = CoffeeBean.objects.filter(
+            id__in=recommended_coffee_item_ids
+        )
+
+        serializer = CoffeeBeanSerializer(coffee_beans, many=True)
         return Response(serializer.data)
 
 
