@@ -6,7 +6,7 @@ from .models import (
     CoffeeBeanOrigin,
     CoffeeInCart,
     RecommendedCoffeeColdStart,
-    RecommendedCoffeeUserItem,
+    RecommendedCoffeeNotColdStart,
     UserImplicit,
 )
 
@@ -17,5 +17,5 @@ admin.site.register(CoffeeBeanReview)
 admin.site.register(CoffeeBeanOrigin)
 admin.site.register(CoffeeInCart)
 admin.site.register(RecommendedCoffeeColdStart)
-admin.site.register(RecommendedCoffeeUserItem)
+admin.site.register(RecommendedCoffeeNotColdStart)
 admin.site.register(UserImplicit)

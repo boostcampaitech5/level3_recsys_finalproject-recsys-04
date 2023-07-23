@@ -129,7 +129,7 @@ class RecommendedCoffeeColdStart(models.Model):
         return str(self.user.nickname + " - Recommended Coffees")
 
 
-class RecommendedCoffeeUserItem(models.Model):
+class RecommendedCoffeeNotColdStart(models.Model):
     """
     User-Item Interaction Recommendated Coffee Item
     -  유저-아이템 Interaction 기반 추천된 커피 원두 아이템 리스트
@@ -142,7 +142,7 @@ class RecommendedCoffeeUserItem(models.Model):
 
     class Meta:
         managed = True
-        db_table = "rec_coffee_user_item"
+        db_table = "rec_coffee_not_cold_start"
 
     def __str__(self):
         return str(self.user.nickname + " - Recommended Coffees")
