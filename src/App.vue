@@ -8,12 +8,12 @@
   <NavVar @openLoginModal="
   this.modalShow = !this.modalShow;"></NavVar>
   <router-view></router-view>
-  <Footer></Footer>
+  <!-- <Footer></Footer> -->
 </template>
 
 <script>
 import NavVar from "./components/NavVar.vue";
-import Footer from "./components/Footer.vue";
+// import Footer from "./components/Footer.vue";
 import LoginComponent from "./components/Login.vue";
 import { ref } from "vue"
 
@@ -21,7 +21,7 @@ export default {
   name: "App",
   components: {
     NavVar,
-    Footer,
+    // Footer,
     LoginComponent,
   },
   setup(){

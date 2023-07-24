@@ -66,61 +66,37 @@
         <ul class="list-unstyled components mb-5">
           <li>
             <a> 신맛 </a>
-            <Vueform size="sm" v-model="acidRange" sync>
-              <SliderElement
-                name="range"
-                :default="[0, 10]"
-                :min="0"
-                :max="10"
-                :step="1"
-                show-tooltip="focus"
-                tooltip-position="top"
-              />
-            </Vueform>
+            <VueSlider v-model="acidRange" :max="10" :min="0" :enable-cross="false" :interval="1"  sync>
+            </VueSlider>
           </li>
           <li>
             <a>단맛</a>
-            <Vueform size="sm" v-model="sweetyRange" sync>
-              <SliderElement
-                name="range"
-                :default="[0, 10]"
-                :min="0"
-                :max="10"
-                :step="1"
-                show-tooltip="focus"
-                tooltip-position="top"
-              />
-            </Vueform>
+            <VueSlider v-model="sweetyRange" :max="10" :min="0" :enable-cross="false" :interval="1"  sync>
+            </VueSlider>
           </li>
           <li>
             <a>바디감</a>
-            <Vueform size="sm" v-model="bodyRange" sync>
-              <SliderElement
-                name="range"
-                :default="[0, 10]"
-                :min="0"
-                :max="10"
-                :step="1"
-                show-tooltip="focus"
-                tooltip-position="top"
-              />
-            </Vueform>
+            <VueSlider v-model="bodyRange" :max="10" :min="0" :enable-cross="false" :interval="1"  sync>
+            </VueSlider>
           </li>
           <li>
             <a>로스팅</a>
-            <Vueform size="sm" v-model="roastRange" sync>
-              <SliderElement
-                name="range"
-                :default="[0, 10]"
-                :min="0"
-                :max="10"
-                :step="1"
-                show-tooltip="focus"
-                tooltip-position="top"
-              />
-            </Vueform>
+            <VueSlider v-model="roastRange" :max="10" :min="0" :enable-cross="false" :interval="1"  sync>
+            </VueSlider>
           </li>
         </ul>
+        <div class="mb-5">
+          <h5>카페인 여부</h5>
+          <div class="tagcloud mt-4">
+            <a
+              href="#"
+              class="tag-cloud-link"
+              v-for="decaf in ['디카페인']"
+              :key="decaf"
+              >{{ decaf }}</a
+            >
+          </div>
+        </div>
         <div class="mb-5">
           <h5>원산지</h5>
           <div class="tagcloud mt-4">
@@ -164,17 +140,15 @@ export default {
   },
   data() {
     return {
-      // modalShow:false,
+      // filter info
+      acidRange:[0, 10],
+      sweetyRange:[0,10],
+      bodyRange:[0,10],
+      roastRange:[0,10],
     };
   },
   // composition API
   setup() {
-    // filter 정보
-    var acidRange = ref([]);
-    var sweetyRange = ref([]);
-    var bodyRange = ref([]);
-    var roastRange = ref([]);
-
     // 원두 정보
     var page = ref(0);
     var prev = ref("");
@@ -207,6 +181,12 @@ export default {
           console.log(getted);
           prev.value = getted.data.previous;
           next.value = getted.data.next;
+
+          // port number insert
+          if (!next.value.startsWith('http://reconi-backend.kro.kr:30005')){
+            next.value = next.value.replace('http://reconi-backend.kro.kr', 'http://reconi-backend.kro.kr:30005')
+          }
+
           bean_data.value = bean_data.value.concat(getted.data.results);
         })
         .catch(() => {
@@ -220,6 +200,12 @@ export default {
           console.log(getted);
           prev.value = getted.data.previous;
           next.value = getted.data.next;
+
+          // port number insert
+          if (!next.value.startsWith('http://reconi-backend.kro.kr:30005')){
+            next.value = next.value.replace('http://reconi-backend.kro.kr', 'http://reconi-backend.kro.kr:30005')
+          }
+          
           bean_data.value = bean_data.value.concat(getted.data.results);
           console.log("실행됨");
         })
@@ -245,10 +231,6 @@ export default {
     });
 
     return {
-      acidRange,
-      sweetyRange,
-      bodyRange,
-      roastRange,
       origins,
       roasteries,
       page,
