@@ -14,7 +14,7 @@
       <div class="text-center text-white">
         <h1 class="display-4 fw-bolder">...님 반갑습니다.</h1>
         <p class="lead fw-normal text-white-50 mb-0">
-          ... 님과 관련된 원두 상품들을 보여드릴게요.
+          커피 플레이리스트가 여러분의 커피 경험을 업그레이드시켜줄게요
         </p>
       </div>
     </div>

@@ -2,11 +2,11 @@
   <section class="py-5">
     <div>
       <h1 class="fw-bolder">정확한 추천을 위해 당신에 대해 알려주세요.</h1>
-      <p class="lead fw-normal text-white-50 mb-0">
-        응답해주신 기록을 바탕으로 당신에게 꼭 맞는 커피를 추천해드릴게요.
-      </p>
+      <h2 class="lead fw-normal mb-0" style="color:black;">
+        여러분의 취향을 파악하여 꼭 맞는 원두를 찾아드릴게요.
+      </h2>
     </div>
-    <div style="padding-left : 500px; padding-right : 500px; text-align: right;" class="justify-content-center">
+    <div style="padding-top : 50px; padding-left : 500px; padding-right : 500px; text-align: right;" class="justify-content-center">
       <Vueform :force-labels="true" v-model="this.formData" :endpoint="false" @submit="onSubmit">
          <template #empty>
            <FormSteps>

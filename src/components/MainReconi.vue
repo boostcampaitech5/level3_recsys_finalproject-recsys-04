@@ -88,7 +88,7 @@ export default {
   /* justify-content: center; */
   /* align-items: center; */
   gap: 10px;
-  background: url("/opt/repo/reconi-frontend/src/assets/reconi/sample-reconicat.jpg");
+  background: url("../assets/reconi/sample-reconicat.jpg");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;

@@ -31,7 +31,6 @@ export default new Vuex.Store({
       state.pk = null;
     },
     setUserCart(state, cart) {
-      console.log("==========================userCartSet");
       state.userCart = cart;
     },
   },
@@ -59,10 +58,12 @@ export default new Vuex.Store({
             )
             .then((getted) => {
               commit("setUserCart", getted.data.user_item_ids);
+              localStorage.setItem("cart", getted.data.user_item_ids);
             });
         })
-        .catch((e) => {
-          console.log(e);
+        .catch(() => {
+          console.log('계정 정보가 잘못되었습니다.');
+          alert("계정 정보가 잘못되었습니다.");
         });
     },
     LOGOUT({ commit }) {
@@ -76,6 +77,7 @@ export default new Vuex.Store({
           commit("expireToken");
           localStorage.removeItem("accTkn");
           localStorage.removeItem("pk");
+          localStorage.removeItem("cart")
           // location.reload();
         });
     },

@@ -19,7 +19,7 @@
         <b-button variant="outline-primary" @click="$emit('openModal', bean)"
           >원두 보러가기</b-button
         >
-        <b-button variant="primary">담기</b-button>
+        <b-button @click="test" variant="primary">담기</b-button>
       </div>
     </b-card>
   </div>
@@ -58,6 +58,9 @@ export default {
         return "http://reconi-backend.kro.kr:30005/" + url;
       }
     },
+    test(){
+      alert(this.$store.state.userCart)
+    }
   },
 };
 </script>
