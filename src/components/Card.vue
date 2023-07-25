@@ -88,22 +88,26 @@ export default {
       }
     },
     addCart(beanId) {
-      axios
-        .post(
-          "http://reconi-backend.kro.kr:30005/api/v1/coffee-cart/add_to_cart/",
-          { coffee_bean_id: beanId },
-          {
-            headers: {
-              Authorization: `Bearer ${this.$store.state.token}`,
-            },
-          }
-        )
-        .then(() => {
-          this.$store.commit("addUserCart", beanId);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      if (this.$store.getters.isLogin){
+        axios
+          .post(
+            "http://reconi-backend.kro.kr:30005/api/v1/coffee-cart/add_to_cart/",
+            { coffee_bean_id: beanId },
+            {
+              headers: {
+                Authorization: `Bearer ${this.$store.state.token}`,
+              },
+            }
+          )
+          .then(() => {
+            this.$store.commit("addUserCart", beanId);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else{
+        alert('로그인을 먼저 진행해주세요!')
+      }
     },
     removeFromCart(beanId){
       axios.
