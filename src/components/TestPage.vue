@@ -208,7 +208,7 @@ export default {
           }
         )
         .then((getted) => {
-          this.test_done = !this.test_done;
+          this.test_done = true
           this.beans = getted.data;
           console.log(getted);
         })
