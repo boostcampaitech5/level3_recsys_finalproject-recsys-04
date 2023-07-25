@@ -22,12 +22,17 @@
     <div>
       <nav id="sidebar">
         <div class="p-4 pt-5">
+          <h4
+            class="pb-4"
+            style="color: black; word-break: keep-all; text-align: center"
+          >
+            원산지
+          </h4>
           <h5
             class="pb-4"
             style="color: black; word-break: keep-all; text-align: center"
           >
-            로스터리 {{ selectedBean?.roastery }}의
-            {{ selectedBean?.title }} 원두는 이런 특징을 가지고 있어요
+            {{ selectedBean?.origins.join(", ") }}
           </h5>
           <ul class="list-unstyled components mb-5">
             <li class="pt-4">
@@ -86,12 +91,15 @@
       </nav>
     </div>
   </div>
+
   <div class="pb-4">
     <div>
       <b-button
         block
         variant="primary"
-        style="margin: 0 auto; display:flex; justify-content:center"
+        style="margin: 0 auto; display: flex; justify-content: center"
+        v-if="!this.$store.getters.isInCart(selectedBean?.id)"
+        @click="addCart(selectedBean?.id)"
       >
         내 취향 원두 리스트에 담기
       </b-button>
@@ -102,7 +110,7 @@
         target="_blank"
         block
         variant="outline-primary"
-        style=" margin: 0 auto; display:flex; justify-content:center"
+        style="margin: 0 auto; display: flex; justify-content: center"
       >
         {{ selectedBean?.roastery }} 로스터리로 구매하러 가기
       </b-button>
@@ -112,6 +120,7 @@
 
 <script>
 import beanImg from "../assets/product/sample-product.jpg";
+import axios from "axios";
 
 export default {
   name: "product-detail",
@@ -136,9 +145,30 @@ export default {
           );
           return this.new_url;
         }
-
       } else {
         return "http://reconi-backend.kro.kr:30005/" + url;
+      }
+    },
+    addCart(beanId) {
+      if (this.$store.getters.isLogin) {
+        axios
+          .post(
+            "http://reconi-backend.kro.kr:30005/api/v1/coffee-cart/add_to_cart/",
+            { coffee_bean_id: beanId },
+            {
+              headers: {
+                Authorization: `Bearer ${this.$store.state.token}`,
+              },
+            }
+          )
+          .then(() => {
+            this.$store.commit("addUserCart", beanId);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else {
+        alert("로그인을 먼저 진행해주세요!");
       }
     },
   },
