@@ -28,14 +28,14 @@
             <img
               v-if="!this.$store.getters.isInCart(bean?.id)" 
               @click="addCart(bean?.id)"
-              src="../assets/card/unlike.png"
-              alt="Like"
+              src="../../public/unlike.png"
+              alt="UnLike"
               style="width: 40px; height: 40px; cursor:pointer;"
             />
             <img
               v-else
               @click="removeFromCart(bean?.id)"
-              src="../assets/card/like.png"
+              src="../../public/like.png"
               alt="Like"
               style="width: 40px; height: 40px; cursor:pointer;"
             />
@@ -51,8 +51,7 @@
 
 <script>
 import axios from "axios";
-import Like from "../assets/card/like.png";
-import Unlike from "../assets/card/unlike.png";
+
 
 export default {
   name: "main-product-sample-card",
@@ -65,8 +64,6 @@ export default {
         fontSize: "10px",
         modalShow: false,
         new_url: null,
-        Like: Like,
-        Unlike: Unlike,
       },
     };
   },

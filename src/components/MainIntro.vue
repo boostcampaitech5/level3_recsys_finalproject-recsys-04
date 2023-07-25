@@ -47,7 +47,8 @@ export default {
   justify-content: center;
   align-items: center;
   gap: 20px;
-  background-image: url('../assets/mainpage/main-sample.jpg');
+  /* background-image: url('../assets/mainpage/main-sample.jpg'); */
+  background-image: url('../../public/main-sample.jpg');
   /* background-size : contain; */
   /* background-size : 100% 100%; */
   /* background: var(--light-primary-origin, #3563e9); */
