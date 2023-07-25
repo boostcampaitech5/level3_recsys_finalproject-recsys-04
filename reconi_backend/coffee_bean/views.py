@@ -156,6 +156,17 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     @permission_classes([AllowAny])
+    def all_items(self, request):
+        # 전체 커피 원두 아이템을 가져옵니다.
+        all_coffee_beans = CoffeeBean.objects.all()
+
+        # random_coffee_beans = CoffeeBean.objects.order_by("?")[:20]
+        # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
+        serializer = CoffeeBeanSerializer(all_coffee_beans, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    @permission_classes([AllowAny])
     def unique_categories(self, request):
         # 중복 제거된 모든 roastery 값을 가져옵니다.
         unique_roastery_values = (
@@ -243,7 +254,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
         coffee_beans = CoffeeBean.objects.filter(
             id__in=recommended_coffee_item_ids
-        )
+        ).order_by('id')
 
         serializer = CoffeeBeanSerializer(coffee_beans, many=True)
         return Response(serializer.data)
@@ -335,6 +346,8 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
     def mypage(self, request):
         user = request.user
 
+        
+
         #### 담기 리스트
         try:
             coffeeincart = CoffeeInCart.objects.get(user=user)
@@ -342,6 +355,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
             coffeeincart_coffee_item_ids = (
                 coffeeincart.coffee_beans.values_list("id", flat=True)
             )
+            nickname = coffeeincart.user.nickname
 
             # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
             coffeeincart_coffee = CoffeeBean.objects.filter(
@@ -401,6 +415,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
         # key vale 형식으로 데이터를 반환합니다.
         unique_categories = {
+            "nickname" : nickname,
             "cart": cart,
             "not_cold_start": not_cold_start,
             "cold_start": cold_start,

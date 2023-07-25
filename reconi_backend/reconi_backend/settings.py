@@ -40,7 +40,8 @@ INFERENCE_NOTCOLDSTART = os.getenv("INFERENCE_NOTCOLDSTART", "")
 SECRET_KEY = os.getenv("SECRET_KEY", "")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
+# DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -311,6 +312,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 # STATICFILES_DIRS = [
 #     # os.path.join(BASE_DIR, "coffee_bean", "static"),
 #     # os.path.join(BASE_DIR, "user", "static"),
