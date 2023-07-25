@@ -14,7 +14,9 @@ export default new Vuex.Store({
       return state.token == null ? false : true;
     },
     isInCart: (state) => (beanId) => {
-      return state.userCart.includes(beanId);
+      if (!!state.userCart && state.userCart.length != 0) {
+        return state.userCart.includes(beanId);
+      } else return false;
     },
   },
   mutations: {

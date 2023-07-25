@@ -12,7 +12,7 @@
   <header class="bg-dark py-5">
     <div class="container px-4 px-lg-5 my-5">
       <div class="text-center text-white">
-        <h1 class="display-4 fw-bolder">...님 반갑습니다.</h1>
+        <h1 class="display-4 fw-bolder">{{nickname}}님 반갑습니다.</h1>
         <p class="lead fw-normal text-white-50 mb-0">
           커피 플레이리스트가 여러분의 커피 경험을 업그레이드시켜줄게요
         </p>
@@ -26,7 +26,7 @@
       </div>
     <div class="container px-4 px-lg-5 mt-5">
       <div
-        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center"
+        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center"
       >
         <div class="col mb-5" v-for="bean in coldStart" :key="bean">
           <Card
@@ -47,7 +47,7 @@
       </div>
     <div class="container px-4 px-lg-5 mt-5">
       <div
-        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center"
+        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center"
       >
         <div class="col mb-5" v-for="bean in notColdStart" :key="bean">
           <Card
@@ -103,6 +103,7 @@ export default{
     var cart = ref([]);
     var coldStart = ref([]);
     var notColdStart = ref([]);
+    var nickname = ref([]);
 
     function getUserData(){
       axios
@@ -116,6 +117,7 @@ export default{
         cart.value = getted.data.cart;
         coldStart.value = getted.data.cold_start;
         notColdStart.value = getted.data.not_cold_start;
+        nickname.value = getted.data.nickname;
       })
       .catch(()=>{
         console.log("실패😘");
@@ -133,7 +135,7 @@ export default{
       cart,
       coldStart,
       notColdStart,
-
+      nickname,
     }
   }
 }

@@ -9,24 +9,28 @@
     </b-modal>
   </div>
 
-  <div class="Wireframe1">
-    <div class="Frame49">
-      <span class="Frame49-Title"> 당신을 위한 추천 커피에요 </span>
-      <span class="Frame49-Sub"> 마음에 드시나요? </span>
+  <section class="py-5">
+    <div>
+      <h3 class="fw-bolder">당신을 위한 추천 커피에요.</h3>
+      <h5> 추천 결과는 언제든지 마이페이지에서 확인할 수 있어요.</h5>
     </div>
-    <div class="Frame50">
-      <Card
-        v-for="bean in beans"
-        @openModal="
-          this.modalShow = !this.modalShow;
-          this.selectedBean = $event;
-        "
-        :key="bean"
-        :bean="bean"
-        style="width: 250px"
-      ></Card>
+    <div class="container px-4 px-lg-5 mt-5">
+      <div
+        class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center"
+      >
+        <div class="col mb-5" v-for="bean in beans" :key="bean">
+          <Card
+            @openModal="
+              this.modalShow = !this.modalShow;
+              this.selectedBean = $event;
+            "
+            :bean="bean"
+            style="width: 300px"
+          ></Card>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -51,49 +55,5 @@ export default {
 </script>
 
 <style scoped>
-.Wireframe1 {
-  display: flex;
-  padding: 82px 71px;
-  flex-direction: column;
-  align-items: center;
-  gap: 102px;
-  background: #fff;
-}
-.Frame49 {
-  display: flex;
-  /* width: 1297.969px; */
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 9px;
-}
-.Frame49-Title {
-  color: var(--system-grey-900, #212121);
-  text-align: center;
-  font-family: Inter;
-  font-size: 64px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
-  letter-spacing: 2.2px;
-  text-transform: uppercase;
-}
-.Frame49-Sub {
-  color: var(--system-grey-600, #757575);
-  text-align: center;
-  font-family: Inter;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-  letter-spacing: 0.2px;
-}
-.Frame50 {
-  display: flex;
-  width: 1111px;
-  /* height: 422px; */
-  justify-content: center;
-  align-items: flex-start;
-  gap: 122px;
-}
+@import "./css/styles.css";
 </style>
