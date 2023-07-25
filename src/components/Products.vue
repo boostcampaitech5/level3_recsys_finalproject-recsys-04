@@ -52,6 +52,7 @@
       </b-container>
 
       <b-button
+        v-if="nextButtonState"
         block
         variant="primary"
         @click="handleNotificationListScroll"
@@ -66,22 +67,22 @@
         <ul class="list-unstyled components mb-5">
           <li>
             <a> 신맛 </a>
-            <VueSlider v-model="acidRange" :max="10" :min="0" :enable-cross="false" :interval="1"  sync>
+            <VueSlider v-model="acidRange" :max="10" :min="0" :enable-cross="false" :interval="1"  :lazy="true" sync>
             </VueSlider>
           </li>
           <li>
             <a>단맛</a>
-            <VueSlider v-model="sweetyRange" :max="10" :min="0" :enable-cross="false" :interval="1"  sync>
+            <VueSlider v-model="sweetyRange" :max="10" :min="0" :enable-cross="false" :interval="1" :lazy="true" sync>
             </VueSlider>
           </li>
           <li>
             <a>바디감</a>
-            <VueSlider v-model="bodyRange" :max="10" :min="0" :enable-cross="false" :interval="1"  sync>
+            <VueSlider v-model="bodyRange" :max="10" :min="0" :enable-cross="false" :interval="1" :lazy="true" sync>
             </VueSlider>
           </li>
           <li>
             <a>로스팅</a>
-            <VueSlider v-model="roastRange" :max="10" :min="0" :enable-cross="false" :interval="1"  sync>
+            <VueSlider v-model="roastRange" :max="10" :min="0" :enable-cross="false" :interval="1" :lazy="true" sync>
             </VueSlider>
           </li>
         </ul>
@@ -89,10 +90,12 @@
           <h5>카페인 여부</h5>
           <div class="tagcloud mt-4">
             <a
-              href="#"
               class="tag-cloud-link"
+              style="color:black"
               v-for="decaf in ['디카페인']"
               :key="decaf"
+              @click="selectDecaf"
+              :style="isDecaf ? 'background-color : aliceblue' : ''"
               >{{ decaf }}</a
             >
           </div>
@@ -101,10 +104,12 @@
           <h5>원산지</h5>
           <div class="tagcloud mt-4">
             <a
-              href="#"
               class="tag-cloud-link"
+              style="color : black ;cursor:pointer;"
               v-for="origin in this.origins"
               :key="origin"
+              @click="addOriginFilter(origin)"
+              :style="getOriginColor(origin)"
               >{{ origin }}</a
             >
           </div>
@@ -113,10 +118,12 @@
           <h5>로스터리</h5>
           <div class="tagcloud mt-4">
             <a
-              href="#"
               class="tag-cloud-link"
               v-for="roastery in this.roasteries"
               :key="roastery"
+              @click="setRoastery(roastery)"
+              style="color:black; cursor:pointer;"
+              :style="setRoasteryColor(roastery)"
               >{{ roastery }}</a
             >
           </div>
@@ -129,7 +136,7 @@
 <script>
 import Card from "./Card.vue";
 import ProductDetail from "./ProductDetail.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 
 export default {
@@ -140,11 +147,6 @@ export default {
   },
   data() {
     return {
-      // filter info
-      acidRange:[0, 10],
-      sweetyRange:[0,10],
-      bodyRange:[0,10],
-      roastRange:[0,10],
     };
   },
   // composition API
@@ -154,13 +156,104 @@ export default {
     var prev = ref("");
     var next = ref("");
     var bean_data = ref([]);
-
     var origins = ref([]);
     var roasteries = ref([]);
+
+    // 버튼 정보
+    var nextButtonState = ref(false);
 
     // modal 정보
     var modalShow = ref(false);
     var selectedBean = ref(null);
+
+    // filter 정보
+    var acidRange = ref([0, 10]);
+    var sweetyRange = ref([0, 10]);
+    var bodyRange = ref([0, 10]);
+    var roastRange = ref([0, 10]);
+    var origins_country = ref([]);
+    var roastery = ref('');
+    var isDecaf = ref(false)
+
+    watch([
+      () => acidRange.value[0],
+      () => acidRange.value[1],
+      () => sweetyRange.value[0],
+      () => sweetyRange.value[1],
+      () => bodyRange.value[0],
+      () => bodyRange.value[1],
+      () => roastRange.value[0],
+      () => roastRange.value[1],
+      origins_country.value,
+      roastery.value
+    ], ()=>{
+      filtering()
+    })
+
+    function selectDecaf(){
+      origins_country.value = []
+      roastery.value = ''
+      if (!isDecaf.value){
+        axios.get("http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/decaffeinated_coffee_beans/")
+        .then((getted)=>{
+          bean_data.value = getted.data;
+        })
+        .catch((e)=>{
+          console.log(e);
+        })
+      }
+      else{
+        getinitpage()
+      }
+      isDecaf.value = !isDecaf.value
+    }
+
+    function setRoastery(input){
+      isDecaf.value = false;
+      roastery.value = input;
+    }
+
+    function setRoasteryColor(input){
+      return roastery.value===input ? 'background-color : aliceblue' : ''
+    }
+
+    function getOriginColor(origin){
+      return origins_country.value.includes(origin) ? 'background-color : aliceblue' : ''
+    }
+
+    function addOriginFilter(origin){
+      isDecaf.value = false;
+      if (origins_country.value.includes(origin)){
+        origins_country.value.splice(origins_country.value.indexOf(origin))
+      } else{
+        origins_country.value.push(origin)
+      }
+    }
+
+    function filtering(){
+      const [acidity__gte, acidity__lte] = acidRange.value;
+      const [sweetness__gte, sweetness__lte] = sweetyRange.value;
+      const [body__gte, body__lte] = bodyRange.value;
+      const [roasting_point__gte, roasting_point__lte] = roastRange.value;
+
+      axios.get("http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/category_filtered/", {
+        origins_country: origins_country.value.join(','),
+        roastery : '콩스콩스',
+        acidity__gte : acidity__gte,
+        acidity__lte : acidity__lte,
+        sweetness__gte : sweetness__gte,
+        sweetness__lte : sweetness__lte,
+        body__gte : body__gte,
+        body__lte : body__lte,
+        roasting_point__gte : roasting_point__gte,
+        roasting_point__lte : roasting_point__lte,
+      }).then((getted)=>{
+        bean_data.value = getted.data;
+        console.log(getted);
+      }).catch((e)=>{
+        console.log(e);
+      })
+    }
 
     function getOrigins() {
       axios
@@ -168,6 +261,7 @@ export default {
         .then((getted) => {
           origins.value = getted.data.origin;
           roasteries.value = getted.data.roastery;
+          nextButtonState.value = true;
         })
         .catch(() => {
           console.log("실패😘");
@@ -181,13 +275,15 @@ export default {
           console.log(getted);
           prev.value = getted.data.previous;
           next.value = getted.data.next;
+          nextButtonState.value = true;
 
           // port number insert
           if (!next.value.startsWith('http://reconi-backend.kro.kr:30005')){
             next.value = next.value.replace('http://reconi-backend.kro.kr', 'http://reconi-backend.kro.kr:30005')
           }
 
-          bean_data.value = bean_data.value.concat(getted.data.results);
+          // bean_data.value = bean_data.value.concat(getted.data.results);
+          bean_data.value = getted.data.results;
         })
         .catch(() => {
           console.log("실패😘");
@@ -210,17 +306,18 @@ export default {
           console.log("실행됨");
         })
         .catch((e) => {
+          alert('마지막 페이지입니다.')
+          nextButtonState.value = false;
           console.log("실패😘");
           console.log(e);
         });
     }
 
-    function handleNotificationListScroll(e) {
+      function handleNotificationListScroll(e) {
       const { scrollHeight, scrollTop, clientHeight } = e.target;
       console.log(scrollHeight, scrollTop, clientHeight);
       const isAtTheBottom = scrollHeight === scrollTop + clientHeight;
       if (isAtTheBottom) {
-        // setTimeout(() => getNextPage(), 1000);
         getNextPage();
       }
     }
@@ -231,6 +328,15 @@ export default {
     });
 
     return {
+      getNextPage,
+      filtering,
+      addOriginFilter,
+      getOriginColor,
+      setRoastery,
+      setRoasteryColor,
+      selectDecaf,
+      handleNotificationListScroll,
+
       origins,
       roasteries,
       page,
@@ -239,8 +345,14 @@ export default {
       next,
       modalShow,
       selectedBean,
-      getNextPage,
-      handleNotificationListScroll,
+      acidRange,
+      sweetyRange,
+      bodyRange,
+      roastRange,
+      origins_country,
+      roastery,
+      isDecaf,
+      nextButtonState,
     };
   },
 };
