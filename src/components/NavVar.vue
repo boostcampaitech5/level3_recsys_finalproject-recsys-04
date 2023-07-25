@@ -45,20 +45,24 @@ export default {
       this.$router.push("/");
     },
     mvPage(url) {
-      axios
-        .post("http://reconi-backend.kro.kr:30005/user/token/verify/", {
-          token: this.$store.state.token,
-        })
-        .then(() => {
-          this.$router.push(url);
-        })
-        .catch(() => {
-          alert("다시 로그인 해주세요!");
-          this.$store.commit("expireToken");  // logout
-          localStorage.removeItem("accTkn");
-          localStorage.removeItem("pk");
-          localStorage.removeItem("cart");
-        });
+      if (this.$store.getters.isLogin){
+        axios
+          .post("http://reconi-backend.kro.kr:30005/user/token/verify/", {
+            token: this.$store.state.token,
+          })
+          .then(() => {
+            this.$router.push(url);
+          })
+          .catch(() => {
+            alert("다시 로그인 해주세요!");
+            this.$store.commit("expireToken");  // logout
+            localStorage.removeItem("accTkn");
+            localStorage.removeItem("pk");
+            localStorage.removeItem("cart");
+          });
+      } else{
+        this.$router.push(url);
+      }
     },
   },
 };
