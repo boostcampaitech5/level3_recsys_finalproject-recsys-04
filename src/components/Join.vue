@@ -1,66 +1,110 @@
 <template>
-  <Vueform
-    v-model="this.form"
-    :endpoint="false"
-  >
-    <GroupElement name="personal_information" label="Your information">
-      <TextElement
-        name="nickname"
-        placeholder="Nickname"
-        rules="required|max:255"
-        :columns="6"
-        :debounce="300"
-      />
-      <!-- <b-button variant="danger" :columns="4">중복 확인</b-button> -->
-      <ButtonElement name="checkNickName" :columns="3" @click="checkNickName">
-        중복 확인
-      </ButtonElement>
-    </GroupElement>
-
-    <GroupElement name="account_information" label="Account information">
-      <TextElement
-        name="email"
-        placeholder="Email address"
-        rules="required|email|max:255"
-        :debounce="300"
-        :columns="8"
-      />
-      <ButtonElement name="checkEmail" :columns="3" @click="checkEmail">
-        중복 확인
-      </ButtonElement>
-      <TextElement
-        name="password1"
-        input-type="password"
-        placeholder="Password"
-        :debounce="300"
-        :rules="['required', 'regex:/^(?=.*[a-z])(?=.*[0-9])(?=.{8,})/']"
-        :messages="{
-          regex:
-            'The Password must at least 8 characters long and contain at least one number, one uppercase and one lowercase character.',
-        }"
-      />
-      <TextElement
-        name="password2"
-        input-type="password"
-        placeholder="Password again"
-        rules="required"
-      />
-    </GroupElement>
-    <ButtonElement
-      name="register"
-      add-class="mt-2"
-      submits
-      @click="if (onSend()) $emit('closeModal');"
+  <b-form @submit="onSend">
+    <b-form-group
+      label="Nickname"
+      label-for="input-nickname"
+      description="등록할 닉네임을 입력해주세요 (2자~8자)"
     >
-      Register
-    </ButtonElement>
-  </Vueform>
+      <div class="row">
+        <div class="col-md-10">
+          <b-form-input
+            id="input-nickname"
+            v-model="this.form.nickname"
+            type="text"
+            :state="nickNameState"
+            placeholder="Enter nickname"
+            required
+          ></b-form-input>
+          <b-form-invalid-feedback id="input-live-feedback">
+            닉네임 중복 확인을 진행해주세요!
+          </b-form-invalid-feedback>
+        </div>
+        <div class="col-md-2">
+          <b-button variant="primary" class="pb-2" @click="checkNickName">
+            중복 확인
+          </b-button>
+        </div>
+      </div>
+    </b-form-group>
+
+    <b-form-group
+      label="Email"
+      label-for="input-email"
+      description="등록할 이메일을 입력해주세요"
+    >
+      <div class="row">
+        <div class="col-md-10">
+          <b-form-input
+            id="input-email"
+            v-model="this.form.email"
+            type="email"
+            :state="this.emailState"
+            placeholder="Enter email"
+            required
+          ></b-form-input>
+          <b-form-invalid-feedback id="input-live-feedback">
+            이메일 중복 확인을 진행해주세요!
+          </b-form-invalid-feedback>
+        </div>
+        <div class="col-md-2">
+          <b-button variant="primary" class="pb-2" @click="checkEmail">
+            중복 확인
+          </b-button>
+        </div>
+      </div>
+    </b-form-group>
+
+    <b-form-group
+      label="Password"
+      label-for="input-password"
+      description="등록할 비밀번호을 입력해주세요"
+    >
+      <div class="row">
+        <div class="col-md-8">
+          <b-form-input
+            id="input-email"
+            v-model="this.form.password1"
+            type="password"
+            :state="passwordState"
+            placeholder="Enter Password"
+            required
+          ></b-form-input>
+          <b-form-invalid-feedback id="input-live-feedback">
+            문자 1개와 숫자 1개를 포함하여 8자리 이상의 비밀번호를 입력해주세요.
+          </b-form-invalid-feedback>
+        </div>
+      </div>
+    </b-form-group>
+
+    <b-form-group
+      label="Password Confirm"
+      label-for="input-password2"
+      description="비밀번호를 다시 한 번 입력해주세요"
+    >
+      <div class="row">
+        <div class="col-md-8">
+          <b-form-input
+            id="input-password2"
+            v-model="this.form.password2"
+            type="password"
+            :state="passwordConfirmState"
+            placeholder="Enter Password again"
+            required
+          ></b-form-input>
+          <b-form-invalid-feedback id="input-live-feedback">
+            위에서 입력한 Password를 한 번 더 입력해주세요
+          </b-form-invalid-feedback>
+        </div>
+      </div>
+    </b-form-group>
+    <b-button type="submit" variant="outline-success"> Register </b-button>
+  </b-form>
 
   <!-- 테스트임 -->
   <!-- <div>
     {{ this.form }}
     {{ nickname_validation }}
-    {{ email_validation }}
+    {{ passwordConfirmState }}
   </div> -->
 </template>
 
@@ -71,10 +115,30 @@ export default {
   name: "main-join",
   data() {
     return {
-      form: {},
+      form: {
+        nickname: "",
+        email: "",
+        password1: "",
+        password2: "",
+      },
       nickname_validation: false,
       email_validation: false,
     };
+  },
+  computed: {
+    nickNameState() {
+      return this.nickname_validation;
+    },
+    emailState() {
+      return this.email_validation;
+    },
+    passwordConfirmState() {
+      return this.form.password1 === this.form.password2;
+    },
+    passwordState(){
+      const regex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;     // 문자열이 최소 1개의 문자와 1개의 숫자를 포함하고, 8자리 이상인지 확인
+      return regex.test(this.form.password1);
+    }
   },
   methods: {
     checkNickName() {
@@ -89,10 +153,8 @@ export default {
           alert(getted.data.detail);
           this.nickname_validation = true;
         })
-        .catch(() => {
-          // alert(getted.response.data.detail);
-          alert("해당 닉네임은 사용할 수 없습니다.");
-          // this.nickname_validation = false;
+        .catch((getted) => {
+          alert(getted.response.data.detail);
           this.form.nickname = "";
         });
     },
@@ -108,22 +170,13 @@ export default {
           alert(getted.data.detail);
           this.email_validation = true;
         })
-        .catch(() => {
-          alert("해당 이메일은 사용할 수 없습니다.");
-          // alert(getted.response.data.detail);
-          // this.email_validation = false;
+        .catch((getted) => {
+          alert(getted.response.data.detail);
+          // alert("해당 이메일은 사용할 수 없습니다.");
           this.form.email = "";
         });
     },
     onSend() {
-      if (!this.nickname_validation) {
-        alert("닉네임 중복확인을 해주세요!");
-        return false;
-      }
-      if (!this.email_validation) {
-        alert("이메일 중복확인을 해주세요!");
-        return false;
-      }
       axios
         .post(
           "http://reconi-backend.kro.kr:30005/user/registration/",
@@ -133,10 +186,9 @@ export default {
           location.reload();
         })
         .catch((getted) => {
-          console.log(getted)
-          alert('중복 검사를 진행해주세요.');
+          console.log(getted);
+          alert("중복 검사를 진행해주세요.");
         });
-      return true;
     },
   },
 };
