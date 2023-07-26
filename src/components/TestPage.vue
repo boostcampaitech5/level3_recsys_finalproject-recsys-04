@@ -1,23 +1,15 @@
 <template>
-  <section class="py-5" v-if="this.step != 5">
-    <div>
-      <h1 class="fw-bolder">정확한 추천을 위해 당신에 대해 알려주세요.</h1>
-      <h2 class="lead fw-normal mb-0" style="color: black">
+  <b-container>
+    <b-row v-if="this.step != 5" style="padding: 80px">
+      <h1 class="display-4 fw-bolder">
+        정확한 추천을 위해 당신에 대해 알려주세요.
+      </h1>
+      <p class="lead fw-normal text-black-50 p-4">
         여러분의 취향을 파악하여 꼭 맞는 원두를 찾아드릴게요.
-      </h2>
-    </div>
-    <div
-      style="
-        padding-top: 50px;
-        margin-left: 500px;
-        margin-right: 500px;
-        /* border: 1.5px solid gray; */
-        /* border-radius: 1rem; */
-        /* text-align: right; */
-      "
-      class="justify-content-center"
-    >
-      <div v-if="this.step == 1">
+      </p>
+    </b-row>
+    <b-row v-if="this.step == 1">
+      <b-col cols="12">
         <h5>Step1</h5>
         <b-form-group
           id="fileset-1"
@@ -38,9 +30,14 @@
             style="padding-top: 30px"
           ></b-form-radio-group>
         </b-form-group>
+      </b-col>
+      <b-col style="padding:40px; padding-bottom:80px">
         <b-button @click="this.step = 2"> next </b-button>
-      </div>
-      <div v-if="this.step == 2">
+      </b-col>
+    </b-row>
+
+    <b-row v-if="this.step == 2">
+      <b-col cols="12">
         <h5>Step2</h5>
         <b-form-group
           id="fileset-2"
@@ -59,7 +56,9 @@
             input must be number
           </b-form-invalid-feedback>
         </b-form-group>
-        <b-container>
+      </b-col>
+      <b-col>
+        <b-container style="padding:40px; padding-bottom:80px">
           <b-row>
             <b-col>
               <b-button @click="this.step = 1"> before </b-button>
@@ -69,8 +68,11 @@
             </b-col>
           </b-row>
         </b-container>
-      </div>
-      <div v-if="this.step == 3">
+      </b-col>
+    </b-row>
+
+    <b-row v-if="this.step == 3">
+      <b-col cols="12">
         <h5>Step3</h5>
         <b-form-group
           id="fileset-3"
@@ -89,11 +91,13 @@
             ]"
             buttons
             button-variant="outline-primary"
-            size="lg"
+            size="md"
             style="padding-top: 30px"
           ></b-form-radio-group>
         </b-form-group>
-        <b-container>
+      </b-col>
+      <b-col>
+        <b-container style="padding:40px; padding-bottom:80px">
           <b-row>
             <b-col>
               <b-button @click="this.step = 2"> before </b-button>
@@ -103,8 +107,10 @@
             </b-col>
           </b-row>
         </b-container>
-      </div>
-      <div v-if="this.step == 4">
+      </b-col>
+    </b-row>
+    <b-row v-if="this.step == 4">
+      <b-col cols="12">
         <h5 style="padding-bottom: 50px">Step4</h5>
         <h5>커피를 드실 때 선호하는 향미의 정도를 알려주세요</h5>
         <p>향미는 원두가 가지고 있는 향의 정도를 나타냅니다.</p>
@@ -117,6 +123,8 @@
           style="padding-top: 50px; padding-bottom: 80px"
         >
         </VueSlider>
+      </b-col>
+      <b-col cols="12"> 
         <h5>커피를 드실 때 선호하는 산미의 정도를 알려주세요</h5>
         <p>산미는 원두가 가지고 있는 신 맛의 정도를 나타냅니다.</p>
         <VueSlider
@@ -128,6 +136,8 @@
           style="padding-top: 50px; padding-bottom: 80px"
         >
         </VueSlider>
+      </b-col>
+      <b-col cols="12">
         <h5>커피를 드실 때 선호하는 단 맛의 정도를 알려주세요</h5>
         <p>단 맛은 원두가 가지고 있는 단 맛의 정도를 나타냅니다.</p>
         <VueSlider
@@ -139,6 +149,8 @@
           style="padding-top: 50px; padding-bottom: 80px"
         >
         </VueSlider>
+      </b-col>
+      <b-col cols="12">
         <h5>커피를 드실 때 선호하는 바디감의 정도를 알려주세요</h5>
         <p>바디감은 커피가 입 안으로 들어왔을 때 주는 무게감을 나타냅니다.</p>
         <VueSlider
@@ -150,6 +162,8 @@
           style="padding-top: 50px; padding-bottom: 80px"
         >
         </VueSlider>
+      </b-col>
+      <b-col cols="12">
         <h5>커피를 드실 때 선호하는 원두 로스팅의 정도를 알려주세요</h5>
         <p>로스팅정도는 원두를 가열하여 볶은 정도를 의미합니다.</p>
         <VueSlider
@@ -161,7 +175,9 @@
           style="padding-top: 50px; padding-bottom: 80px"
         >
         </VueSlider>
-        <b-container>
+      </b-col>
+      <b-col cols="12">
+        <b-container style="padding-top: 50px; padding-bottom: 80px">
           <b-row>
             <b-col>
               <b-button @click="this.step = 3"> before </b-button>
@@ -171,14 +187,15 @@
             </b-col>
           </b-row>
         </b-container>
-      </div>
-    </div>
-  </section>
-
-  <TestResult
-    :beans="this.beans"
-    v-if="this.test_done && this.step == 5"
-  ></TestResult>
+      </b-col>
+    </b-row>
+  </b-container>
+  <b-container>
+    <TestResult
+      :beans="this.beans"
+      v-if="this.test_done && this.step == 5"
+    ></TestResult> 
+  </b-container>
 </template>
 
 <script>
