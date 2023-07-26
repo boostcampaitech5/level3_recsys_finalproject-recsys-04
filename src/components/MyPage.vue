@@ -12,7 +12,7 @@
   <header class="bg-dark py-5">
     <div class="container px-4 px-lg-5 my-5">
       <div class="text-center text-white">
-        <h1 class="display-4 fw-bolder">{{nickname}}님 반갑습니다.</h1>
+        <h1 class="display-4 fw-bolder" style="color:white">{{nickname}}님 반갑습니다.</h1>
         <p class="lead fw-normal text-white mb-0">
           커피 플레이리스트가 여러분의 커피 경험을 업그레이드시켜줄게요
         </p>
@@ -123,6 +123,7 @@ export default{
         nickname.value = getted.data.nickname;
       })
       .catch(()=>{
+        alert('자세한 내 정보를 보기 위해 테스트를 먼저 진행해주세요 원두 상품을 담아주세요 :)')
         console.log("실패😘");
       })
     }
@@ -135,10 +136,11 @@ export default{
       })
       .then((getted)=>{
         console.log(getted)
-        notColdStart.value=getted.data;
+        notColdStart.value=getted.data ;
         alert('현재 담기된 데이터를 기반으로 추천된 아이템들이 업데이트 됐어요!')
       })
       .catch((e)=>{
+        alert('먼저 좋아하는 상품을 담아주세요. 좋아하는 상품과 유사한 상품을 찾아줄게요.')
         console.log(e);
       })
     }
