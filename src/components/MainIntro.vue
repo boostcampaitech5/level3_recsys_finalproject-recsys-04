@@ -2,7 +2,7 @@
   <header class="bg-dark py-5">
     <div class="container px-4 px-lg-5 my-5">
       <div class="text-center text-white">
-        <h1 class="display-4 fw-bolder">
+        <h1 class="display-4 fw-bolder" style="color:white">
           당신에게 어울리는 커피를 <br />
           찾아드릴게요
         </h1>
