@@ -185,7 +185,7 @@ export default {
       () => roastRange.value[0],
       () => roastRange.value[1],
       origins_country.value,
-      roastery.value
+      roastery,
     ], ()=>{
       filtering()
     })
@@ -218,11 +218,16 @@ export default {
     }
 
     function getOriginColor(origin){
+      if (origin === null) return ''
       return origins_country.value.includes(origin) ? 'background-color : aliceblue' : ''
     }
 
     function addOriginFilter(origin){
       isDecaf.value = false;
+      if (origins_country.value===[]){
+        origins_country.value.push(origin)
+        return
+      }
       if (origins_country.value.includes(origin)){
         origins_country.value.splice(origins_country.value.indexOf(origin))
       } else{
@@ -231,28 +236,23 @@ export default {
     }
 
     function filtering(){
-      const [acidity__gte, acidity__lte] = acidRange.value;
-      const [sweetness__gte, sweetness__lte] = sweetyRange.value;
-      const [body__gte, body__lte] = bodyRange.value;
-      const [roasting_point__gte, roasting_point__lte] = roastRange.value;
-
-      axios.get("http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/category_filtered/", {
-        origins_country: origins_country.value.join(','),
-        roastery : '콩스콩스',
-        acidity__gte : acidity__gte,
-        acidity__lte : acidity__lte,
-        sweetness__gte : sweetness__gte,
-        sweetness__lte : sweetness__lte,
-        body__gte : body__gte,
-        body__lte : body__lte,
-        roasting_point__gte : roasting_point__gte,
-        roasting_point__lte : roasting_point__lte,
-      }).then((getted)=>{
+      axios.get(getURL()).then((getted)=>{
         bean_data.value = getted.data;
         console.log(getted);
       }).catch((e)=>{
         console.log(e);
       })
+    }
+
+    function getURL(){
+      let query = `http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/category_filtered/?&acidity__gte=${acidRange.value[0]}&acidity__lte=${acidRange.value[1]}&sweetness__gte=${sweetyRange.value[0]}&sweetness__lte=${sweetyRange.value[1]}&body__gte=${bodyRange.value[0]}&body__lte=${bodyRange.value[1]}&roasting_point__gte=${roastRange.value[0]}&roasting_point__lte=${roastRange.value[1]}`
+      if (origins_country.value.length != 0){
+        query += `&origins_country=${origins_country.value.join(',')}`
+      }
+      if (roastery.value != ''){
+        query += `&roastery=${roastery.value}`
+      }
+      return query
     }
 
     function getOrigins() {
@@ -336,6 +336,7 @@ export default {
       setRoasteryColor,
       selectDecaf,
       handleNotificationListScroll,
+      getURL,
 
       origins,
       roasteries,
