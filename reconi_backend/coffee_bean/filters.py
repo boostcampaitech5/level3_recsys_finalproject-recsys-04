@@ -9,13 +9,17 @@ filter_parameters = [
         "Comma-separated list of coffee bean origins (e.g., 에티오피아,콜롬비아)",
         openapi.TYPE_STRING,
     ),
+    (
+        "roastery",
+        "Comma-separated list of coffee bean roasteries (e.g., 콩스콩스,레스트빈)",
+        openapi.TYPE_STRING,
+    ),
     # ("aroma", "Coffee bean aroma", openapi.TYPE_NUMBER),
     # ("acidity", "Coffee bean acidity", openapi.TYPE_INTEGER),
     # ("sweetness", "Coffee bean sweetness", openapi.TYPE_INTEGER),
     # ("body", "Coffee bean body", openapi.TYPE_INTEGER),
     # ("balance", "Coffee bean balance", openapi.TYPE_NUMBER),
     # ("roasting_point", "Coffee bean roasting point", openapi.TYPE_NUMBER),
-    ("roastery", "Coffee bean roastery", openapi.TYPE_STRING),
     ("aroma__gte", "Minimum value for coffee bean aroma", openapi.TYPE_NUMBER),
     ("aroma__lte", "Maximum value for coffee bean aroma", openapi.TYPE_NUMBER),
     (

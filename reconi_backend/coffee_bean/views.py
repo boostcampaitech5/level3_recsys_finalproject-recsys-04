@@ -75,14 +75,15 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
     pagination_class = CoffeeBeanPagination
 
     # 필터링 로직을 함수로 분리합니다.
-    def apply_filters(self, queryset, filters):
+    def apply_filters(self,request, queryset, filters):
         for field_name, param_name in filters.items():
-            param_value = self.request.query_params.get(param_name)
+            param_value = request.query_params.get(param_name)
+            print(f"{param_name} : {param_value}")
             if param_value is not None:
                 if "__" in param_name:
-                    param_lookup = param_name.split("__")[1]  # gte, lte 등
+                    # param_lookup = param_name.split("__")[1]  # gte, lte 등
                     filter_params = {
-                        f"{field_name}__{param_lookup}": param_value
+                        f"{param_name}": param_value
                     }
                 else:
                     filter_params = {f"{field_name}__exact": param_value}
@@ -112,19 +113,30 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 coffeebeanorigins__origin__country__in=origins
             )
-
+        # 로스터리 필터를 적용하는 경우:
+        roastery = request.query_params.getlist("roastery")
+        if roastery:
+            queryset = queryset.filter(
+                            roastery__in=roastery
+                        )
+            
         # 추가적인 필터들을 적용합니다.
         filters = {
-            "aroma": "aroma__exact",
-            "acidity": "acidity",
-            "sweetness": "sweetness",
-            "body": "body",
-            "balance": "balance",
-            "roasting_point": "roasting_point",
-            "roastery": "roastery__exact",
+            "aroma__lte": "aroma__lte",
+            "aroma__gte": "aroma__gte",
+            "acidity__lte": "acidity__lte",
+            "acidity__gte": "acidity__gte",
+            "sweetness_lte": "sweetness_lte",
+            "sweetness_gte": "sweetness_gte",
+            "body_lte": "body_lte",
+            "body_gte": "body_gte",
+            "balance_lte": "balance_lte",
+            "balance_gte": "balance_gte",
+            "roasting_point_lte": "roasting_point_lte",
+            "roasting_point_gte": "roasting_point_gte",
         }
 
-        queryset = self.apply_filters(queryset, filters)
+        queryset = self.apply_filters(request,queryset, filters)
 
         # Serializer를 통해 직렬화한 후 응답합니다.
         serializer = CoffeeBeanSerializer(queryset, many=True)
@@ -261,9 +273,10 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"])
     def not_cold_start_inferenced(self, request):
+        user = request.user
         inference_server_url = getattr(settings, "INFERENCE_NOTCOLDSTART", "")
 
-        cart_data = CoffeeInCart.objects.all().values_list(
+        cart_data = CoffeeInCart.objects.filter(user=user).values_list(
             "user_id", "coffee_beans__id"
         )
 
@@ -297,12 +310,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
             return Response(
                 {"error": "Failed to send inference request."}, status=500
             )
-        return Response(status=200)
-
-    @action(detail=False, methods=["get"])
-    def not_cold_start_recommended(self, request):
-        user = request.user
-
+        
         try:
             instance = RecommendedCoffeeNotColdStart.objects.get(user=user)
 
@@ -321,6 +329,29 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
         serializer = CoffeeBeanSerializer(coffee_beans, many=True)
         return Response(serializer.data)
+
+    # @action(detail=False, methods=["get"])
+    # def not_cold_start_recommended(self, request):
+    #     user = request.user
+
+    #     try:
+    #         instance = RecommendedCoffeeNotColdStart.objects.get(user=user)
+
+    #     except RecommendedCoffeeNotColdStart.DoesNotExist:
+    #         return Response({"error": "User's Cart is Not Exist"}, status=404)
+
+    #     # 추천된 커피 원두 데이터를 Top 3개만 가져옵니다.
+    #     recommended_coffee_item_ids = instance.coffee_beans.values_list(
+    #         "id", flat=True
+    #     )
+
+    #     # 선택된 커피 원두 아이템을 Serializer를 통해 직렬화한 후 응답합니다.
+    #     coffee_beans = CoffeeBean.objects.filter(
+    #         id__in=recommended_coffee_item_ids
+    #     )
+
+    #     serializer = CoffeeBeanSerializer(coffee_beans, many=True)
+    #     return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
     def user_cart_ids(self, request):
