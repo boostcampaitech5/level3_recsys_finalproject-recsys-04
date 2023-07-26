@@ -271,8 +271,8 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         serializer = CoffeeBeanSerializer(coffee_beans, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=["post"])
-    def not_cold_start_inferenced(self, request):
+    @action(detail=False, methods=["get"])
+    def not_cold_start_recommended(self, request):
         user = request.user
         inference_server_url = getattr(settings, "INFERENCE_NOTCOLDSTART", "")
 
