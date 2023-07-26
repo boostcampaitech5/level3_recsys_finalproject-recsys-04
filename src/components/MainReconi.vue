@@ -42,7 +42,7 @@
               만들어보세요.
             </p>
           </div>
-          <span class="Frame34-sub"
+          <span class="Frame34-sub pb-4"
             >BoostCamp AI Tech 5기 - Recsys Track 4팀</span
           >
         </div>
