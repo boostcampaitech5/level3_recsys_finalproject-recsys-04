@@ -209,8 +209,13 @@ export default {
     }
 
     function setRoastery(input){
-      isDecaf.value = false;
-      roastery.value = input;
+      if (input == roastery.value){
+        roastery.value = '';
+        getinitpage();
+      } else{
+        isDecaf.value = false;
+        roastery.value = input;
+      }
     }
 
     function setRoasteryColor(input){
