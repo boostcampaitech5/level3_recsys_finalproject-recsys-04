@@ -58,6 +58,7 @@ class CoffeeBeanOriginViewSet(viewsets.ModelViewSet):
 
 def add_recommendations_from_predictions(model, predictions, user):
     # '주어진 추천 결과 저장' 테이블에 유저와 커피 원두 아이템을 추가
+    user = get_object_or_404(ReconiUser, id=user)
     rec_coffee, _ = model.objects.get_or_create(user=user)
 
     rec_coffee.coffee_beans.clear()
@@ -248,7 +249,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
 
             # Inference 결과 DB 인덱싱
             add_recommendations_from_predictions(
-                RecommendedCoffeeColdStart, predictions, user
+                RecommendedCoffeeColdStart, predictions, user.id
             )
 
         except requests.exceptions.RequestException:
@@ -275,8 +276,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
     def not_cold_start_recommended(self, request):
         user = request.user
         inference_server_url = getattr(settings, "INFERENCE_NOTCOLDSTART", "")
-
-        cart_data = CoffeeInCart.objects.filter(user=user).values_list(
+        cart_data = CoffeeInCart.objects.filter(user=user.id).values_list(
             "user_id", "coffee_beans__id"
         )
 
@@ -309,6 +309,10 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
             # 요청이 실패한 경우 에러 메시지를 DRF의 응답으로 반환합니다.
             return Response(
                 {"error": "Failed to send inference request."}, status=500
+            )
+        except KeyError:
+            return Response(
+                {"error": "No Cart For User"}, status=400
             )
         
         try:
