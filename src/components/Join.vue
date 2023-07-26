@@ -183,6 +183,7 @@ export default {
           this.form
         )
         .then(() => {
+          alert('회원가입이 완료되었습니다. 로그인을 진행해주세요.')
           location.reload();
         })
         .catch((getted) => {
