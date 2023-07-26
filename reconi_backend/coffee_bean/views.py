@@ -78,10 +78,8 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
     def apply_filters(self,request, queryset, filters):
         for field_name, param_name in filters.items():
             param_value = request.query_params.get(param_name)
-            print(f"{param_name} : {param_value}")
             if param_value is not None:
                 if "__" in param_name:
-                    # param_lookup = param_name.split("__")[1]  # gte, lte 등
                     filter_params = {
                         f"{param_name}": param_value
                     }
@@ -108,14 +106,16 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         queryset = CoffeeBean.objects.all()
 
         # 원산지 필터를 적용하는 경우:
-        origins = request.query_params.getlist("origins_country")
+        origins = request.query_params.get("origins_country")
         if origins:
+            origins = origins.split(',')
             queryset = queryset.filter(
                 coffeebeanorigins__origin__country__in=origins
             )
         # 로스터리 필터를 적용하는 경우:
-        roastery = request.query_params.getlist("roastery")
+        roastery = request.query_params.get("roastery")
         if roastery:
+            roastery = roastery.split(',')
             queryset = queryset.filter(
                             roastery__in=roastery
                         )
