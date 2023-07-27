@@ -1,0 +1,22 @@
+baseline:
+  config_name: baseline
+  dataset: TorchDataset
+  dataset_params:
+    batch_size: 16
+    shuffle: true
+    test_ratio: 0.1
+  model: AutoRec
+  model_params:
+    num_users: None
+    num_items: None 
+    num_hidden: 64
+    dropout: 0.1
+  trainer: DeepLearningTrainer
+  trainer_params:
+    epochs: 100
+    lr: 0.01
+    weight_decay: 0.005
+    device: cuda
+  topk: 3
+  seed: 0
+    

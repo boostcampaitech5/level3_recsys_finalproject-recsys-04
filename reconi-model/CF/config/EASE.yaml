@@ -1,0 +1,14 @@
+baseline:
+  config_name: baseline
+  data_path: /opt/ml/Recommendation-Modeling/data/entity_linking_interaction.csv
+  dataset: BaseDataset
+  dataset_params:
+    test_ratio: 0.1
+  model: EASE
+  model_params:
+    reg_weight: 500
+  trainer: ClosedFormTrainer
+  trainer_params:
+    device: cpu
+  topk: 3
+  seed: 0

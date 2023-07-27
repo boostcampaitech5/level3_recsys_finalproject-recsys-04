@@ -1,0 +1,14 @@
+baseline:
+  config_name: baseline
+  feedback_type: implicit
+  dataset: BaseDataset
+  dataset_params:
+    test_ratio: 0.05
+  model: EASE
+  model_params:
+    reg_weight: 0.5
+  trainer: ClosedFormTrainer
+  trainer_params:
+    device: cpu
+  topk: 4
+  seed: 0
