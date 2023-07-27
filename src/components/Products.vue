@@ -1,9 +1,11 @@
 <template>
   <div class="w-full bg-white">
     <b-modal v-model="this.modalShow" size="lg" hide-footer>
-      <template #modal-title>
-      </template>
-      <ProductDetail style="display:inline-flex" :selectedBean="this.selectedBean" />
+      <template #modal-title> </template>
+      <ProductDetail
+        style="display: inline-flex"
+        :selectedBean="this.selectedBean"
+      />
       <!-- {{ this.selectedBean }} -->
     </b-modal>
   </div>
@@ -14,25 +16,13 @@
       class="p-4 p-md-5 pt-5"
       @scroll="handleNotificationListScroll"
     >
-      <h2 class="mb-4">당신이 찾는 모든 커피</h2>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-        velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-        occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-        mollit anim id est laborum.
+      <h2 class="mb-4">지금 우리와 함께 커피의 세계를 탐험해보세요</h2>
+      <p style="word-break: keep-all;">
+       매일 아침의 여유로운 커피 시간, 바쁜 날의 달콤한 작은 쉼표,
+         <br> <br> 우리의 다양하고 특별한 커피 상품들과 풍부한
+        정보가 여러분을 기다리고 있습니다. 
       </p>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-        velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-        occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-        mollit anim id est laborum.
-      </p>
+      
 
       <b-container
         class="bv-example-row mr-4"
@@ -67,22 +57,54 @@
         <ul class="list-unstyled components mb-5">
           <li>
             <a> 신맛 </a>
-            <VueSlider v-model="acidRange" :max="10" :min="0" :enable-cross="false" :interval="1"  :lazy="true" sync>
+            <VueSlider
+              v-model="acidRange"
+              :max="10"
+              :min="0"
+              :enable-cross="false"
+              :interval="1"
+              :lazy="true"
+              sync
+            >
             </VueSlider>
           </li>
           <li>
             <a>단맛</a>
-            <VueSlider v-model="sweetyRange" :max="10" :min="0" :enable-cross="false" :interval="1" :lazy="true" sync>
+            <VueSlider
+              v-model="sweetyRange"
+              :max="10"
+              :min="0"
+              :enable-cross="false"
+              :interval="1"
+              :lazy="true"
+              sync
+            >
             </VueSlider>
           </li>
           <li>
             <a>바디감</a>
-            <VueSlider v-model="bodyRange" :max="10" :min="0" :enable-cross="false" :interval="1" :lazy="true" sync>
+            <VueSlider
+              v-model="bodyRange"
+              :max="10"
+              :min="0"
+              :enable-cross="false"
+              :interval="1"
+              :lazy="true"
+              sync
+            >
             </VueSlider>
           </li>
           <li>
             <a>로스팅</a>
-            <VueSlider v-model="roastRange" :max="10" :min="0" :enable-cross="false" :interval="1" :lazy="true" sync>
+            <VueSlider
+              v-model="roastRange"
+              :max="10"
+              :min="0"
+              :enable-cross="false"
+              :interval="1"
+              :lazy="true"
+              sync
+            >
             </VueSlider>
           </li>
         </ul>
@@ -91,7 +113,7 @@
           <div class="tagcloud mt-4">
             <a
               class="tag-cloud-link"
-              style="color:black"
+              style="color: black"
               v-for="decaf in ['디카페인']"
               :key="decaf"
               @click="selectDecaf"
@@ -105,7 +127,7 @@
           <div class="tagcloud mt-4">
             <a
               class="tag-cloud-link"
-              style="color : black ;cursor:pointer;"
+              style="color: black; cursor: pointer"
               v-for="origin in this.origins"
               :key="origin"
               @click="addOriginFilter(origin)"
@@ -122,7 +144,7 @@
               v-for="roastery in this.roasteries"
               :key="roastery"
               @click="setRoastery(roastery)"
-              style="color:black; cursor:pointer;"
+              style="color: black; cursor: pointer"
               :style="setRoasteryColor(roastery)"
               >{{ roastery }}</a
             >
@@ -146,8 +168,7 @@ export default {
     ProductDetail,
   },
   data() {
-    return {
-    };
+    return {};
   },
   // composition API
   setup() {
@@ -172,97 +193,110 @@ export default {
     var bodyRange = ref([0, 10]);
     var roastRange = ref([0, 10]);
     var origins_country = ref([]);
-    var roastery = ref('');
-    var isDecaf = ref(false)
+    var roastery = ref("");
+    var isDecaf = ref(false);
 
-    watch([
-      () => acidRange.value[0],
-      () => acidRange.value[1],
-      () => sweetyRange.value[0],
-      () => sweetyRange.value[1],
-      () => bodyRange.value[0],
-      () => bodyRange.value[1],
-      () => roastRange.value[0],
-      () => roastRange.value[1],
-      origins_country.value,
-      roastery,
-    ], ()=>{
-      filtering()
-    })
+    watch(
+      [
+        () => acidRange.value[0],
+        () => acidRange.value[1],
+        () => sweetyRange.value[0],
+        () => sweetyRange.value[1],
+        () => bodyRange.value[0],
+        () => bodyRange.value[1],
+        () => roastRange.value[0],
+        () => roastRange.value[1],
+        origins_country.value,
+        roastery,
+      ],
+      () => {
+        filtering();
+      }
+    );
 
-    function selectDecaf(){
-      origins_country.value = []
-      roastery.value = ''
-      if (!isDecaf.value){
-        axios.get("http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/decaffeinated_coffee_beans/")
-        .then((getted)=>{
-          bean_data.value = getted.data;
-        })
-        .catch((e)=>{
-          console.log(e);
-        })
+    function selectDecaf() {
+      origins_country.value = [];
+      roastery.value = "";
+      if (!isDecaf.value) {
+        axios
+          .get(
+            "http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/decaffeinated_coffee_beans/"
+          )
+          .then((getted) => {
+            bean_data.value = getted.data;
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      } else {
+        getinitpage();
       }
-      else{
-        getinitpage()
-      }
-      isDecaf.value = !isDecaf.value
+      isDecaf.value = !isDecaf.value;
     }
 
-    function setRoastery(input){
-      if (input == roastery.value){
-        roastery.value = '';
+    function setRoastery(input) {
+      if (input == roastery.value) {
+        roastery.value = "";
         getinitpage();
-      } else{
+      } else {
         isDecaf.value = false;
         roastery.value = input;
       }
     }
 
-    function setRoasteryColor(input){
-      return roastery.value===input ? 'background-color : aliceblue' : ''
+    function setRoasteryColor(input) {
+      return roastery.value === input ? "background-color : aliceblue" : "";
     }
 
-    function getOriginColor(origin){
-      if (origin === null) return ''
-      return origins_country.value.includes(origin) ? 'background-color : aliceblue' : ''
+    function getOriginColor(origin) {
+      if (origin === null) return "";
+      return origins_country.value.includes(origin)
+        ? "background-color : aliceblue"
+        : "";
     }
 
-    function addOriginFilter(origin){
+    function addOriginFilter(origin) {
       isDecaf.value = false;
-      if (origins_country.value===[]){
-        origins_country.value.push(origin)
-        return
+      if (origins_country.value === []) {
+        origins_country.value.push(origin);
+        return;
       }
-      if (origins_country.value.includes(origin)){
-        origins_country.value.splice(origins_country.value.indexOf(origin))
-      } else{
-        origins_country.value.push(origin)
+      if (origins_country.value.includes(origin)) {
+        origins_country.value.splice(origins_country.value.indexOf(origin));
+      } else {
+        origins_country.value.push(origin);
       }
     }
 
-    function filtering(){
-      axios.get(getURL()).then((getted)=>{
-        bean_data.value = getted.data;
-        console.log(getted);
-      }).catch((e)=>{
-        console.log(e);
-      })
+    function filtering() {
+      axios
+        .get(getURL())
+        .then((getted) => {
+          bean_data.value = getted.data;
+          console.log(getted);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     }
 
-    function getURL(){
-      let query = `http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/category_filtered/?&acidity__gte=${acidRange.value[0]}&acidity__lte=${acidRange.value[1]}&sweetness__gte=${sweetyRange.value[0]}&sweetness__lte=${sweetyRange.value[1]}&body__gte=${bodyRange.value[0]}&body__lte=${bodyRange.value[1]}&roasting_point__gte=${roastRange.value[0]}&roasting_point__lte=${roastRange.value[1]}`
-      if (origins_country.value.length != 0){
-        query += `&origins_country=${origins_country.value.join(',')}`
+    function getURL() {
+      let query = `http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/category_filtered/?sweetness__gte=${sweetyRange.value[0]}&sweetness__lte=${sweetyRange.value[1]}&acidity__gte=${acidRange.value[0]}&acidity__lte=${acidRange.value[1]}&body__gte=${bodyRange.value[0]}&body__lte=${bodyRange.value[1]}&roasting_point__gte=${roastRange.value[0]}&roasting_point__lte=${roastRange.value[1]}`;
+      // let query = `http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/category_filtered/?acidity__gte=${acidRange.value[0]}&acidity__lte=${acidRange.value[1]}&sweetness__gte=${sweetyRange.value[0]}&sweetness__lte=${sweetyRange.value[1]}&body__gte=${bodyRange.value[0]}&body__lte=${bodyRange.value[1]}&roasting_point__gte=${roastRange.value[0]}&roasting_point__lte=${roastRange.value[1]}`;
+      if (origins_country.value.length != 0) {
+        query += `&origins_country=${origins_country.value.join(",")}`;
       }
-      if (roastery.value != ''){
-        query += `&roastery=${roastery.value}`
+      if (roastery.value != "") {
+        query += `&roastery=${roastery.value}`;
       }
-      return query
+      return query;
     }
 
     function getOrigins() {
       axios
-        .get("http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/unique_categories/")
+        .get(
+          "http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/unique_categories/"
+        )
         .then((getted) => {
           origins.value = getted.data.origin;
           roasteries.value = getted.data.roastery;
@@ -275,7 +309,9 @@ export default {
 
     function getinitpage() {
       axios
-        .get("http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/?page=1&page_size=30")
+        .get(
+          "http://reconi-backend.kro.kr:30005/api/v1/coffee-beans/?page=1&page_size=30"
+        )
         .then((getted) => {
           console.log(getted);
           prev.value = getted.data.previous;
@@ -283,8 +319,11 @@ export default {
           nextButtonState.value = true;
 
           // port number insert
-          if (!next.value.startsWith('http://reconi-backend.kro.kr:30005')){
-            next.value = next.value.replace('http://reconi-backend.kro.kr', 'http://reconi-backend.kro.kr:30005')
+          if (!next.value.startsWith("http://reconi-backend.kro.kr:30005")) {
+            next.value = next.value.replace(
+              "http://reconi-backend.kro.kr",
+              "http://reconi-backend.kro.kr:30005"
+            );
           }
 
           // bean_data.value = bean_data.value.concat(getted.data.results);
@@ -303,22 +342,25 @@ export default {
           next.value = getted.data.next;
 
           // port number insert
-          if (!next.value.startsWith('http://reconi-backend.kro.kr:30005')){
-            next.value = next.value.replace('http://reconi-backend.kro.kr', 'http://reconi-backend.kro.kr:30005')
+          if (!next.value.startsWith("http://reconi-backend.kro.kr:30005")) {
+            next.value = next.value.replace(
+              "http://reconi-backend.kro.kr",
+              "http://reconi-backend.kro.kr:30005"
+            );
           }
-          
+
           bean_data.value = bean_data.value.concat(getted.data.results);
           console.log("실행됨");
         })
         .catch((e) => {
-          alert('마지막 페이지입니다.')
+          alert("마지막 페이지입니다.");
           nextButtonState.value = false;
           console.log("실패😘");
           console.log(e);
         });
     }
 
-      function handleNotificationListScroll(e) {
+    function handleNotificationListScroll(e) {
       const { scrollHeight, scrollTop, clientHeight } = e.target;
       console.log(scrollHeight, scrollTop, clientHeight);
       const isAtTheBottom = scrollHeight === scrollTop + clientHeight;
