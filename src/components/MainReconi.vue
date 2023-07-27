@@ -2,7 +2,7 @@
   <b-container>
     <b-row>
       <h1 class="display-4 fw-bolder p-4">저희는 RecoRecoNi 입니다.</h1>
-      <b-row class="justify-content-md-center p-4"> 
+      <b-row class="row-cols-sm-1 row-cols-md-1 row-cols-lg-5 justify-content-md-center p-4"> 
         <b-col cols="2"><a href="https://github.com/ksumini" class="lead fw-normal text-black-50 p-4" >김수민</a></b-col>
         <b-col cols="2"><a href="https://github.com/y2r1m" class="lead fw-normal text-black-50 p-4" >박예림</a></b-col>
         <b-col cols="2"><a href="https://github.com/limstonestone" class="lead fw-normal text-black-50 p-4" >임도현</a></b-col>
