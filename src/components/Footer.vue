@@ -5,7 +5,7 @@
         <div class="col-md-12 text-center">
           <h2 class="footer-heading">
             <a
-              href="https://zsmalla.notion.site/Reco-Reco-Ni-ee8b16740d044a48bb8879287092ef62?pvs=4"
+              href="https://github.com/boostcampaitech5/level3_recsys_finalproject-recsys-04"
               class="logo"
               >Reco Reco Ni</a
             >
