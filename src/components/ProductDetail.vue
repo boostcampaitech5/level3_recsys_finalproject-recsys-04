@@ -1,6 +1,6 @@
 <template>
-  <div class="container d-md-flex align-items-stretch">
-    <div id="content" class="p-4 p-md-5 pt-5">
+  <div class="container d-md-flex  align-items-stretch">
+    <div id="content" class="p-4 p-md-5 pt-5" style="padding-bottom:0px">
       <h2 style="word-break: keep-all; text-align: center">
         {{ selectedBean?.title }}
       </h2>
@@ -16,7 +16,7 @@
       <img
         :src="getImgUrl(selectedBean?.thumbnail)"
         alt="img"
-        style="max-width: 100%; height: auto; display: block"
+        style="max-width: 100%; height: auto; display:block"
       />
     </div>
     <div>
@@ -177,80 +177,5 @@ export default {
 
 <style scoped>
 @import "./style.css";
-.product-detail {
-  display: inline-flex;
-  padding: 40px 20px;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 66px;
-  background: var(--white, #fff);
-}
 
-.Frame56 {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 40px;
-  align-self: stretch;
-}
-
-.Frame17 {
-  display: flex;
-  width: 562px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 24px;
-}
-
-.Frame16 {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 24px;
-}
-
-.bean-title {
-  color: var(--system-grey-900, #212121);
-  font-family: Inter;
-  font-size: 48px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  letter-spacing: 0.2px;
-  text-transform: capitalize;
-  word-break: keep-all;
-}
-
-.bean-img {
-  display: flex;
-  width: 400px;
-  /* height: 300px; */
-  /* padding: 256px 674px; */
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  word-break: keep-all;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-}
-
-.Frame57 {
-  display: flex;
-  height: 695px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 20px;
-}
-
-.Frame48 {
-  display: flex;
-  /* width: 508px; */
-  /* height: 85px; */
-  padding: 10px;
-  align-items: flex-start;
-  gap: 22px;
-  flex-shrink: 0;
-}
 </style>
