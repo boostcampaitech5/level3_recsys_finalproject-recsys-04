@@ -1,15 +1,18 @@
 <template>
   <b-container>
     <b-row>
-      <h1 class="display-4 fw-bolder">저희는 RecoRecoNi 입니다.</h1>
-      <p class="lead fw-normal text-black-50 p-4">
-        김수민 &nbsp;&nbsp;&nbsp; 박예림 &nbsp;&nbsp;&nbsp; 임도현
-        &nbsp;&nbsp;&nbsp; 임우열 &nbsp;&nbsp;&nbsp; 임지수
-      </p>
+      <h1 class="display-4 fw-bolder p-4">저희는 RecoRecoNi 입니다.</h1>
+      <b-row class="justify-content-md-center p-4"> 
+        <b-col cols="2"><a href="https://github.com/ksumini" class="lead fw-normal text-black-50 p-4" >김수민</a></b-col>
+        <b-col cols="2"><a href="https://github.com/y2r1m" class="lead fw-normal text-black-50 p-4" >박예림</a></b-col>
+        <b-col cols="2"><a href="https://github.com/limstonestone" class="lead fw-normal text-black-50 p-4" >임도현</a></b-col>
+        <b-col cols="2"><a href="https://github.com/Woo-Yeol" class="lead fw-normal text-black-50 p-4" >임우열</a></b-col>
+        <b-col cols="2"><a href="https://github.com/zsmalla" class="lead fw-normal text-black-50 p-4" >임지수</a></b-col>
+      </b-row>
     </b-row>
     <b-row row-cols-lg-1 row-cols-xl-2>
       <b-col sm="12" lg="6">
-        <img src='../../public/sample-reconicat.jpg' style="max-width: 100%; height: auto; text-align: center;">
+        <img src='../../public/coffee_playlist.png' style="max-width: 100%; height: auto; text-align: center;">
       </b-col>
       <b-col class="p-4" lg="12" xl="6">
         <div class="Frame58-Frame16">
@@ -98,4 +101,21 @@ export default {
   text-transform: capitalize;
   text-align: justify;
 }
+
+a { 
+  color: #000;
+  display:inline-block; 
+  margin:0;
+  text-decoration-line: none;
+  text-transform:uppercase; }
+a:after {
+  display:block;
+  content: '';
+  border-bottom: solid 3px #808080;  
+  transform: scaleX(0);  
+  transition: transform 250ms ease-in-out;
+}
+a:hover:after { transform: scaleX(1); }
+a.fromRight:after{ transform-origin:100% 50%; }
+a.fromLeft:after{  transform-origin:  0% 50%; }
 </style>
