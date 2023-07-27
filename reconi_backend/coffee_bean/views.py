@@ -79,6 +79,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
     def apply_filters(self,request, queryset, filters):
         for field_name, param_name in filters.items():
             param_value = request.query_params.get(param_name)
+            print(field_name, param_name,param_value)
             if param_value is not None:
                 if "__" in param_name:
                     filter_params = {
@@ -86,7 +87,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
                     }
                 else:
                     filter_params = {f"{field_name}__exact": param_value}
-
+                print(filter_params)
                 queryset = queryset.filter(**filter_params)
 
         return queryset
@@ -110,6 +111,7 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         origins = request.query_params.get("origins_country")
         if origins:
             origins = origins.split(',')
+            print(origins)
             queryset = queryset.filter(
                 coffeebeanorigins__origin__country__in=origins
             )
@@ -117,24 +119,21 @@ class CoffeeBeanViewSet(viewsets.ModelViewSet):
         roastery = request.query_params.get("roastery")
         if roastery:
             roastery = roastery.split(',')
+            print(origins)
             queryset = queryset.filter(
                             roastery__in=roastery
                         )
             
         # 추가적인 필터들을 적용합니다.
         filters = {
-            "aroma__lte": "aroma__lte",
-            "aroma__gte": "aroma__gte",
             "acidity__lte": "acidity__lte",
             "acidity__gte": "acidity__gte",
-            "sweetness_lte": "sweetness_lte",
-            "sweetness_gte": "sweetness_gte",
-            "body_lte": "body_lte",
-            "body_gte": "body_gte",
-            "balance_lte": "balance_lte",
-            "balance_gte": "balance_gte",
-            "roasting_point_lte": "roasting_point_lte",
-            "roasting_point_gte": "roasting_point_gte",
+            "sweetness__lte": "sweetness__lte",
+            "sweetness__gte": "sweetness__gte",
+            "body__lte": "body__lte",
+            "body__gte": "body__gte",
+            "roasting_point__lte": "roasting_point__lte",
+            "roasting_point__gte": "roasting_point__gte",
         }
 
         queryset = self.apply_filters(request,queryset, filters)
