@@ -10,15 +10,27 @@
               >Reco Reco Ni</a
             >
           </h2>
-          <p class="menu">
-            <a href="https://github.com/ksumini" target="_blank">Sumin</a>
-            <a href="https://github.com/y2r1m" target="_blank">Yerim</a>
-            <a href="https://github.com/limstonestone" target="_blank"
-              >Dohyun</a
-            >
-            <a href="https://github.com/Woo-Yeol" target="_blank">Wooyeol</a>
-            <a href="https://github.com/zsmalla" target="_blank">Jisu</a>
-          </p>
+          <b-row class="row-cols-1 row-cols-md-5 justify-content-center">
+            <!-- <p class="menu"> -->
+              <b-col class="p-1 p-md-0">
+                <a href="https://github.com/ksumini" target="_blank">Sumin</a>
+              </b-col>
+              <b-col class="p-1 p-md-0">
+                <a href="https://github.com/y2r1m" target="_blank">Yerim</a>
+              </b-col>
+              <b-col class="p-1 p-md-0">
+                <a href="https://github.com/limstonestone" target="_blank"
+                  >Dohyun</a
+                >
+              </b-col>
+              <b-col class="p-1 p-md-0">
+                <a href="https://github.com/Woo-Yeol" target="_blank">Wooyeol</a>
+              </b-col>
+              <b-col class="p-1 p-md-0">
+                <a href="https://github.com/zsmalla" target="_blank">Jisu</a>
+              </b-col>
+            <!-- </p> -->
+          </b-row>
         </div>
       </div>
       <div class="row mt-5">
