@@ -3,12 +3,21 @@
 Web Application Service for Coffee Recomendation System
 
 - main page
+
+  일반적인 로스터리 형태의 웹 어플리케이션 구축
   <img src="./docs/assets/main_gif.gif" loop=infinite />
 - coffee recomendation (contents based filtering)
+
+  사용자 선호도 기반 개인화 추천 서비스(contents based filtering) 제공
   <img src="./docs/assets/rec_gif.gif" loop=infinite />
-- mypage (interaction & collaborative filtering)
+- mypage (interaction & hybrid filtering)
+
+  추천 내역, 좋아요 내역을 마이페이지에서 확인 가능, 연관 상품 추천 서비스(hybrid filtering)
   <img src="./docs/assets/mypage_gif.gif" loop=infinite />
+
 - coffee products (filtering)
+
+  커피 상품 페이지, 필터링을 통해 맞춤 원두 탐색 가능
   <img src="./docs/assets/products_gif.gif" loop=infinite />
 
 # SOFTWARE ARCHITECTURE
