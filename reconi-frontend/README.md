@@ -1,6 +1,10 @@
-# reconi-frontend
-FrontEnd Vue Server for Reconi Coffee Recommend System
-=======
+# FrontEnd Vue Server for Reconi Coffee Recommend System
+- vue : 3.3.4
+- state management library : vuex
+- css framework : bootstrap-vue
+- routing : vue-router4
+- HTTP : axios
+- other-library : vue-slider-component
 
 ## Project setup
 ```
