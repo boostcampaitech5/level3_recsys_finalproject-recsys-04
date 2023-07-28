@@ -1,9 +1,0 @@
-baseline:
-  config_name: baseline
-  data_path: /opt/ml/Recommendation-Modeling/data/
-  item_data_path: /opt/ml/Recommendation-Modeling/data/원두정보메타데이터.csv
-  interaction_data_path: /opt/ml/Recommendation-Modeling/data/merged_data.csv
-  result_path: /opt/ml/Recommendation-Modeling/CBF/result/
-  target_item_name: 
-  target_user_name: 이*혁
-  topk: 5
