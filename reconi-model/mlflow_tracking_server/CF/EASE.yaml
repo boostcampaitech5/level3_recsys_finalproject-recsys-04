@@ -12,3 +12,93 @@ baseline:
     device: cpu
   topk: 4
   seed: 0
+
+ver01:
+  config_name: ver01
+  feedback_type: implicit
+  dataset: BaseDataset
+  dataset_params:
+    test_ratio: 0.05
+  model: EASE
+  model_params:
+    reg_weight: 0
+  trainer: ClosedFormTrainer
+  trainer_params:
+    device: cpu
+  topk: 4
+  seed: 0
+
+ver02:
+  config_name: ver02
+  feedback_type: implicit
+  dataset: BaseDataset
+  dataset_params:
+    test_ratio: 0.05
+  model: EASE
+  model_params:
+    reg_weight: 50
+  trainer: ClosedFormTrainer
+  trainer_params:
+    device: cpu
+  topk: 4
+  seed: 0
+
+ver03:
+  config_name: ver03
+  feedback_type: implicit
+  dataset: BaseDataset
+  dataset_params:
+    test_ratio: 0.05
+  model: EASE
+  model_params:
+    reg_weight: 0.05
+  trainer: ClosedFormTrainer
+  trainer_params:
+    device: cpu
+  topk: 4
+  seed: 0
+
+ver04:
+  config_name: ver04
+  feedback_type: implicit
+  dataset: BaseDataset
+  dataset_params:
+    test_ratio: 0.01
+  model: EASE
+  model_params:
+    reg_weight: 0
+  trainer: ClosedFormTrainer
+  trainer_params:
+    device: cpu
+  topk: 4
+  seed: 0
+
+ver05:
+  config_name: ver05
+  feedback_type: implicit
+  dataset: BaseDataset
+  dataset_params:
+    test_ratio: 0.9
+  model: EASE
+  model_params:
+    reg_weight: 0
+  trainer: ClosedFormTrainer
+  trainer_params:
+    device: cpu
+  topk: 4
+  seed: 0
+
+ver06:
+  config_name: ver06
+  feedback_type: implicit
+  dataset: BaseDataset
+  dataset_params:
+    test_ratio: 0.05
+  model: EASE
+  model_params:
+    reg_weight: 0.05
+  trainer: ClosedFormTrainer
+  trainer_params:
+    device: cpu
+  topk: 8
+  seed: 0  

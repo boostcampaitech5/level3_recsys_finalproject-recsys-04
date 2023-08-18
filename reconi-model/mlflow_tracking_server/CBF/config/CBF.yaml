@@ -1,3 +1,23 @@
 baseline:
   config_name: baseline
   topk: 5
+  test_size: 10000
+  seed: 0
+
+ver01:
+  config_name: ver01
+  topk: 4
+  test_size: 10000
+  seed: 0
+
+ver02:
+  config_name: ver02
+  topk: 5
+  test_size: 10000
+  seed: 0
+
+ver03:
+  config_name: ver03
+  topk: 5
+  test_size: 10000
+  seed: 0

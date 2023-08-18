@@ -1,9 +1,12 @@
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 import yaml
 
 from typing import List, Optional
+
+import pickle
 
 from feature_engineering import feature_engineering
 from sqlalchemy import create_engine
@@ -42,7 +45,9 @@ def load_table(query: str) -> pd.DataFrame:
 
 
 def load_item_profile(
-    target_item_ids: Optional[List[int]] = None, all: bool = False
+    target_item_ids: Optional[List[int]] = None,
+    all: bool = False,
+    force_keyword_feature=False,
 ) -> pd.DataFrame:
     """
     콘텐츠 기반 필터링에 필요한 데이터를 불러옵니다.
@@ -67,7 +72,13 @@ def load_item_profile(
     reviews = load_table(load_all_reviews_query)
 
     # -- 전처리
-    items = preprocess(items, reviews, target_item_ids, all=all)
+    items = preprocess(
+        items,
+        reviews,
+        target_item_ids,
+        all=all,
+        force_keyword_feature=force_keyword_feature,
+    )
 
     # -- 피쳐 선택
     features_to_use = [
@@ -100,6 +111,7 @@ def preprocess(
     reviews: pd.DataFrame,
     target_item_ids: Optional[List[int]] = None,
     all: bool = False,
+    force_keyword_feature=False,
 ) -> pd.DataFrame:
     """
     콘텐츠 기반 필터링에 사용할 데이터셋(원두 데이터)의 전처리를 진행합니다.
@@ -127,7 +139,13 @@ def preprocess(
     items = items.drop(columns=["coupang_link"])
 
     # -- 피쳐 엔지니어링 - 리뷰 관련 피쳐 추가
-    items = feature_engineering(items, reviews, target_item_ids, all=all)
+    items = feature_engineering(
+        items,
+        reviews,
+        target_item_ids,
+        all=all,
+        force_keyword_feature=force_keyword_feature,
+    )
 
     # -- 결측치 처리
     # 콩스콩스 로스터리에서 리뷰 수가 결측인 경우는 리뷰가 없었기 때문이므로, 해당 경우는 평점과 리뷰 수를 모두 0으로 대체
@@ -136,9 +154,13 @@ def preprocess(
     ].index  # 리뷰가 없는 콩스콩스 상품들의 인덱스
     items.loc[mask_idx, ["review_count", "rating"]] = 0
 
-    # 나머지 리뷰 수 및 평점, 그리고 향미의 결측치들은 모두 중앙값으로 대체
-    for feature_name in ["review_count", "rating", "aroma"]:
+    # 나머지 리뷰 수 및 평점의 결측치들은 모두 중앙값으로 대체
+    for feature_name in ["review_count", "rating"]:
         items = fill_to_median(items, feature_name)
+        # items = fill_to_mean(items, feature_name)
+
+    # 향미(aroma) 의 경우는 결측치 대체 머신러닝 모델을 사용하여 대체
+    items = impute_aroma(items)
 
     return items
 
@@ -194,3 +216,86 @@ def fill_to_median(data: pd.DataFrame, feature_name: str) -> pd.DataFrame:
     ].median()
 
     return data
+
+
+def fill_to_mean(data: pd.DataFrame, feature_name: str) -> pd.DataFrame:
+    """
+    데이터셋 내 원하는 피쳐들에 대해 결측치를 최빈값으로 대체합니다.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        결측치를 채우고자 하는 데이터셋
+
+    feature_name : str
+        결측치를 채우고 싶은 피쳐의 이름
+
+    Returns
+    -------
+    pd.DataFrame : 결측치가 채워진 데이터셋
+    """
+    data.loc[data[feature_name].isna(), feature_name] = data[
+        feature_name
+    ].mean()
+
+    return data
+
+
+def impute_aroma(items: pd.DataFrame) -> pd.DataFrame:
+    """
+    향미(aroma) 피처의 결측치를 머신러닝 모델을 활용하여 대체합니다.
+
+    Parameters
+    ----------
+    items : pd.DataFrame
+        키워드 추출 집합(keywords_set) 변수가 존재하며 전처리가 진행된 아이템 데이터셋
+
+    Returns
+    -------
+    pd.DataFrame : 향미(aroma) 변수의 결측치가 채워진 데이터셋
+    """
+
+    # 키워드 집합에 있는 원소들을 컬럼으로 가지는 원 핫 인코딩
+    all_keywords = sorted(list(set.union(*items["keywords_set"])))
+    df_encoded = pd.DataFrame(0, index=items.index, columns=all_keywords)
+
+    for idx, keywords in enumerate(items["keywords_set"]):
+        for keyword in keywords:
+            df_encoded.loc[idx, keyword] = 1
+
+    keyword_freq = round(df_encoded.sum() / len(df_encoded) * 100, 2)
+
+    # 출현 빈도가 5% 이상인 키워드만 사용
+    df_encoded = df_encoded[keyword_freq[keyword_freq >= 5].keys()]
+
+    df = pd.concat(
+        [
+            items[["acidity", "sweetness", "body", "roasting_point"]] / 10,
+            df_encoded,
+        ],
+        axis=1,
+    )
+
+    # 실험 결과 최적의 변수들
+    best_features = [
+        "acidity",
+        "body",
+        "sweetness",
+        "roasting_point",
+        "블렌딩",
+        "로스팅",
+        "향미",
+        "산미",
+        "매력",
+    ]
+
+    with open("./aroma_imputator.pkl", "rb") as file:
+        imputator = pickle.load(file)
+
+    na_idx = items[items["aroma"].isna()].index
+    X_test = df.loc[na_idx, best_features]
+
+    preds = np.round(imputator.predict(X_test), 1) * 10
+    items.loc[na_idx, "aroma"] = preds
+
+    return items

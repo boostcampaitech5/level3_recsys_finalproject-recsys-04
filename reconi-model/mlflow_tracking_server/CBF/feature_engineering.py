@@ -17,6 +17,7 @@ def feature_engineering(
     reviews: pd.DataFrame,
     target_item_ids: List[int] = None,
     all: bool = False,
+    force_keyword_feature=False,
 ) -> pd.DataFrame:
     """
     아이템 데이터셋에 대해 새로운 피쳐를 만들어 추가합니다.
@@ -53,8 +54,11 @@ def feature_engineering(
     )
 
     # -- 추출한 키워드 피쳐로부터 자카드 유사도를 계산한 피쳐 생성
-    if not os.path.exists(
-        "/opt/ml/Recommendation-Modeling/mlflow_tracking_server/CBF/item-item_cosine_sim.pkl"
+    if (
+        not os.path.exists(
+            "/opt/ml/Recommendation-Modeling/mlflow_tracking_server/CBF/item-item_cosine_sim.pkl"
+        )
+        or force_keyword_feature
     ):
         # -- item description으로부터 키워드 추출 - 키워드 피쳐 생성
         items = extract_keywords(items)

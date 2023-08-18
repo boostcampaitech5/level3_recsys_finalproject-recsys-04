@@ -135,16 +135,41 @@ class Wrapper(mlflow.pyfunc.PythonModel):
             .values
         )
 
+        # 레스트빈과 콩스콩스 아이템이 거의 동일한 문제 해결을 위함
+        rest_bean_ids = [i for i in range(87, 129)]  # 레스트빈 아이템 id
+
+        non_rest_bean_items = (
+            self.cosine_sim.loc[
+                list(
+                    set(self.cosine_sim.index) - set(rest_bean_ids + ksks_ids)
+                ),
+                ksks_rec_items,
+            ]
+            .idxmax()
+            .values
+        )
+
         preds["score"] = any_rec_items
-        preds.columns = ["user", "ksks_item", "any_item"]
+        preds["non_rest_bean_item"] = non_rest_bean_items
+        preds.columns = ["user", "ksks_item", "any_item", "non_rest_bean_item"]
 
         result = {}
         for user, group_values in preds.groupby("user"):
-            result[f"{user}"] = (
-                group_values[["ksks_item", "any_item"]]
+            rec_items = (
+                group_values[["ksks_item", "any_item", "non_rest_bean_item"]]
                 .values.flatten()
                 .tolist()
             )
+            rec_items_topk = list(set(rec_items[:8]))
+
+            i = 0
+
+            while len(rec_items_topk) != config["topk"]:
+                rec_items_topk.append(rec_items[8 + i])
+                rec_items_topk = list(set(rec_items_topk))
+                i += 1
+
+            result[f"{user}"] = rec_items_topk
 
         return result
 
