@@ -39,7 +39,7 @@ def coupang_review() -> None:
     URL = "postgresql+psycopg2://sumin:sumin@101.101.210.35:30005/djangodb"
     engine = create_engine(URL, echo=False)
 
-    pg_query = "select * from coffee_bean_bean where coupang_link is not null and roastery = '콩스콩스' limit 5;"
+    pg_query = "select * from coffee_bean_bean where coupang_link is not null and roastery = '콩스콩스'"
     df = pd.read_sql_query(pg_query, con=engine)
 
     start = time.time()
@@ -47,15 +47,6 @@ def coupang_review() -> None:
         url = df["coupang_link"][idx]
         title = df["title"][idx]
         roastery = df["roastery"][idx]
-        # # url이 없는 경우 pass
-        # if url is None:
-        #     continue
-        # else:  # url이 유효하다면 실행
-        #     try:
-        #         requests.get(url)
-        #     except requests.exceptions.RequestException:
-        #         logger.info(f"유효하지 않은 URL입니다. {df['title']} 리뷰 데이터 수집 실패!")
-        #         continue
 
         OpenPyXL.save_file(
             title, roastery, url=url, save_none_contents=True
@@ -133,7 +124,7 @@ def transform_load_review() -> None:
             cursor, insert_sql, values, template=None, page_size=1000
         )
 
-        logger.info(f"{reviews['원두이름']} 데이터 Load 완료!")
+        logger.info(f"{reviews['원두이름'][0]} 데이터 Load 완료!")
 
         os.remove(file_path + file)
 
@@ -144,19 +135,18 @@ def transform_load_review() -> None:
     conn.close()
 
 
-# with 구문으로 DAG 정의를 시작합니다.
+# with 구문으로 DAG 정의를 시작
 with DAG(
     dag_id="coupang_review",  # DAG의 식별자용 아이디
     description="쿠팡 리뷰 배치단위 수집(크롤링)",  # DAG에 대한 설명
-    start_date=days_ago(1),  # DAG 정의 기준 2일 전부터 시작
+    start_date=days_ago(1),  # DAG 정의 기준 1일 전부터 시작
     schedule_interval="0 0 * * *",  # 매일 자정에 실행
     tags=["review_coupang"],  # 태그는 리뷰로 설정
 ) as dag:
-    # 테스크를 정의합니다.
-
-    # python 함수인 coupang_review()를 실행해 raw data를 csv 형태로 반환합니다.
+    # 테스크를 정의
+    # python 함수인 coupang_review()를 실행해 raw data를 csv 형태로 반환
     t1 = PythonOperator(
-        task_id="extract_law_data",
+        task_id="extract_raw_data",
         python_callable=coupang_review,
         depends_on_past=True,
         owner="sumin",
@@ -164,7 +154,7 @@ with DAG(
         retry_delay=timedelta(minutes=5),
     )
 
-    # coupang_review()를 통해 수집된 raw data를 전처리 후 DB에 load합니다.
+    # coupang_review()를 통해 수집된 raw data를 전처리 후 DB에 load
     t2 = PythonOperator(
         task_id="transform_load_data",
         python_callable=transform_load_review,
@@ -174,6 +164,6 @@ with DAG(
         retry_delay=timedelta(minutes=5),
     )
 
-    # 테스크 순서를 정합니다.
-    # t1 실행 후 t2를 실행합니다.
+    # 테스크 순서 정의
+    # t1 실행 후 t2를 실행
     t1 >> t2

@@ -1,11 +1,32 @@
 from bs4 import BeautifulSoup as bs
 from typing import Optional, Union, Dict, List
+
 import time
+from datetime import datetime, timedelta
+
 import os
 import re
 import requests as rq
 import json
 import pandas as pd
+
+import logging
+
+# 로거 인스턴스 생성
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# 콘솔 핸들러 생성
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
+# 로그 포맷 설정
+log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+formatter = logging.Formatter(log_format)
+console_handler.setFormatter(formatter)
+
+# 콘솔 핸들러를 로거에 추가
+logger.addHandler(console_handler)
 
 
 def get_headers(
@@ -36,6 +57,7 @@ class Coupang:
         self.__headers: Dict[str, str] = get_headers(key="headers")
         self.url = url
         self.save_none_contents = save_none_contents
+        self.flag = False
 
     def main(self) -> List[List[Dict[str, Union[str, int]]]]:
         # URL 주소
@@ -50,34 +72,16 @@ class Coupang:
         session = rq.Session()
 
         # 평점별 리뷰 개수
-        with session.get(
-            url=f"https://www.coupang.com/vp/product/reviews?productId={prod_code}&page=1&size=5&sortBy=ORDER_SCORE_ASC&ratings=&q=&viRoleCode=3&ratingSummary=true",
-            headers=self.__headers,
-        ) as response:
-            html = response.text
-            soup = bs(html, "html.parser")
-
-            div_elements = soup.select(
-                "div.sdp-review__article__list__hidden-rating > div.js_reviewArticleHiddenValue"
-            )
-
-            review_cnt_per_rating = [
-                int(div_element["data-count"]) for div_element in div_elements
-            ]  # 평점 5~1까지 순서대로 각 평점에서의 리뷰 개수 저장
-
-            page_cnt_per_rating = map(
-                lambda x: x // 5 + 1, review_cnt_per_rating
-            )  # 리뷰 개수에 따라 페이지 수를 구함 (한 페이지 당 리뷰 5개)
-
         # URL 주소 재가공
         URLS: List[str] = [
-            f"https://www.coupang.com/vp/product/reviews?productId={prod_code}&page={page}&size=5&sortBy=ORDER_SCORE_ASC&ratings={rating}&q=&viRoleCode=3&ratingSummary=true"
-            for rating, page_cnt in zip(range(5, 0, -1), page_cnt_per_rating)
-            for page in range(1, page_cnt + 1)
+            f"https://www.coupang.com/vp/product/reviews?productId={prod_code}&page={page}&size=5&sortBy=DATE_DESC&ratings=&q=&viRoleCode=3&ratingSummary=true"
+            for page in range(1, 1500 + 1)  # 리뷰는 최대 1페이지에 5개씩 300페이지까지 총 1500개 확인 가능, 최신순으로 정렬
         ]
 
         saved_data_list = []
-        for url in URLS:
+        for url in URLS:  # 1페이지부터 1500페이지까지의 링크 순회
+            if self.flag:  # 수집일자에 해당하는 데이터만 수집함(더 이상 다음 페이지 리뷰 확인할 필요없음)
+                break
             saved_data = self.fetch(
                 url=url,
                 session=session,
@@ -85,8 +89,8 @@ class Coupang:
             )
 
             if saved_data is None:  # 리뷰가 더 이상 없으므로 데이터를 더 이상 수집하지 않아도 됨
-                continue
-            else:
+                break
+            else: # 리뷰가 있는 경우, 수집한 데이터 추가
                 saved_data_list.append(saved_data)
 
         return saved_data_list
@@ -95,6 +99,9 @@ class Coupang:
         self, url: str, session, save_none_contents: bool = False
     ) -> List[Dict[str, Union[str, int]]]:
         save_data: List[Dict[str, Union[str, int]]] = list()
+
+        now = datetime.now() - timedelta(days=1)
+        today = ".".join(map(str, [now.year, now.month, now.day]))
 
         with session.get(url=url, headers=self.__headers) as response:
             html = response.text
@@ -111,6 +118,21 @@ class Coupang:
             for idx in range(article_lenth):
                 dict_data: Dict[str, Union[str, int]] = dict()
                 articles = soup.select("article.sdp-review__article__list")
+
+                # 날짜
+                date = articles[idx].select_one(
+                    "div.sdp-review__article__list__info__product-info__reg-date"
+                )
+                if date is None or date.text == "":
+                    date = "알 수 없음"
+                else:
+                    date = date.text.strip()
+
+                # 데이터를 수집하는 날짜와 일치하는 데이터만 수집함
+                if date != today:
+                    logger.info(f"데이터 수집일: {today}, 리뷰 작성일: {date}")
+                    self.flag = True
+                    return save_data  # 더 이상 해당 페이지 데이터 확인할 필요 없음
 
                 # 리뷰 내용
                 review_content = articles[idx].select_one(
@@ -169,15 +191,6 @@ class Coupang:
                 else:
                     answer = answer.text.strip()
 
-                # 날짜
-                date = articles[idx].select_one(
-                    "div.sdp-review__article__list__info__product-info__reg-date"
-                )
-                if date is None or date.text == "":
-                    date = "알 수 없음"
-                else:
-                    date = date.text.strip()
-
                 dict_data["상품명"] = prod_name
                 dict_data["구매자 이름"] = user_name
                 dict_data["구매자 평점"] = rating
@@ -189,7 +202,6 @@ class Coupang:
 
                 save_data.append(dict_data)
 
-                # print(dict_data, "\n")
 
             time.sleep(1)
 
@@ -208,7 +220,7 @@ class OpenPyXL:
 
         all_empty = all(not result for result in results)
         if all_empty:  # 저장된 리뷰가 없으면 파일을 저장하지 않음
-            print("리뷰가 없어 파일을 저장할 수 없습니다.")
+            logger.info(f"{title}의 새로운 리뷰가 없습니다.")
             return
 
         # 파일명이 있는 리뷰의 위치
@@ -240,4 +252,4 @@ class OpenPyXL:
 
         result_df.to_csv(os.path.join(savePath, fileName), index=False)
 
-        print(f"파일 저장완료!\n\n{os.path.join(savePath,fileName)}")
+        logger.info(f"파일 저장 완료!\n\n{os.path.join(savePath, fileName)}")
